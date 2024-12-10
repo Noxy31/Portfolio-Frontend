@@ -14,6 +14,11 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@types/three": "^0.170.0",
+    "gsap": "^3.12.5",
+    "lucide-vue-next": "^0.468.0",
+    "simplex-noise": "^4.0.3",
+    "three": "^0.171.0",
     "vue": "^3.5.13",
     "vue-router": "^4.4.5"
   },

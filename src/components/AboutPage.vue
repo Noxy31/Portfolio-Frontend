@@ -2,7 +2,7 @@
 import { ref, watch } from 'vue'
 import { Home, UserCircle, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucide-vue-next'
 import type { LucideIcon } from 'lucide-vue-next'
-import HomeBlob from '../components/blobs/HomeBlob.vue'
+import BlobAbout from '@/components/blobs/AboutBlob.vue'
 
 interface NavItem {
   icon: LucideIcon
@@ -83,7 +83,7 @@ watch(isDarkMode, (newValue) => {
         </ul>
       </nav>
 
-      <HomeBlob :isDarkMode="isDarkMode" />
+      <BlobAbout :isDarkMode="isDarkMode" />
     </div>
   </div>
 </template>

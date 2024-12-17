@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import * as THREE from 'three'
 import { gsap } from 'gsap'
+import { useRoute } from 'vue-router'
 
 const props = defineProps<{
   isDarkMode: boolean
@@ -15,25 +16,43 @@ const performanceSettings = {
 }
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
+const route = useRoute()
 const mousePosition = new THREE.Vector3()
 let scene: THREE.Scene
 let camera: THREE.PerspectiveCamera
 let renderer: THREE.WebGLRenderer
 let blob: THREE.Mesh
 let lastTime = 0
+let animationFrameId: number | null = null
+let isComponentMounted = true
 
 const frameInterval = 1000 / performanceSettings.targetFPS
 const clock = new THREE.Clock()
 
-// Shader colors for dark and light modes
 const colors = {
   dark: {
-    start: new THREE.Color(0.435, 0.659, 0.800), // #6EA8CC
-    end: new THREE.Color(0.416, 0.298, 0.576)    // #6a4c93
+    start: new THREE.Color(0.435, 0.659, 0.800),
+    end: new THREE.Color(0.416, 0.298, 0.576)
   },
   light: {
-    start: new THREE.Color(0.235, 0.359, 0.500), // #3C5B80
-    end: new THREE.Color(0.216, 0.158, 0.376)    // #372860
+    start: new THREE.Color(0.235, 0.359, 0.500),
+    end: new THREE.Color(0.216, 0.158, 0.376)
+  }
+}
+
+const cleanupThreeJS = () => {
+  if (blob) {
+    if (blob.geometry) blob.geometry.dispose()
+    if (blob.material instanceof THREE.Material) blob.material.dispose()
+    scene?.remove(blob)
+  }
+
+  renderer?.dispose()
+  renderer?.forceContextLoss()
+  const gl = renderer?.getContext()
+  if (gl) {
+    const extension = gl.getExtension('WEBGL_lose_context')
+    extension?.loseContext()
   }
 }
 
@@ -62,7 +81,7 @@ const createBlob = () => {
       float fresnel = pow(1.0 - abs(dot(normalize(vNormal), normalize(vec3(0.0, 0.0, 1.0)))), 2.0);
       finalColor = mix(finalColor, vec3(1.0), fresnel * 0.5);
 
-      gl_FragColor = vec4(finalColor, 1);
+      gl_FragColor = vec4(finalColor, 1.0);
     }
   `
 
@@ -84,15 +103,18 @@ const createBlob = () => {
 }
 
 const init = () => {
+  if (!canvasRef.value) return
+
   scene = new THREE.Scene()
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
   camera.position.z = 5
 
   renderer = new THREE.WebGLRenderer({
-    canvas: canvasRef.value!,
+    canvas: canvasRef.value,
     alpha: true,
     antialias: !isMobile,
-    powerPreference: "high-performance"
+    powerPreference: "high-performance",
+    preserveDrawingBuffer: true
   })
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2))
@@ -101,7 +123,9 @@ const init = () => {
 }
 
 const animate = () => {
-  requestAnimationFrame(animate)
+  if (!isComponentMounted) return
+
+  animationFrameId = requestAnimationFrame(animate)
 
   const currentTime = performance.now()
   const deltaTime = currentTime - lastTime
@@ -129,24 +153,21 @@ const animate = () => {
 
         const vertex = new THREE.Vector3(initialX, initialY, initialZ)
         const distanceToMouse = vertex.distanceTo(mousePosition)
-
         const mouseFactor = Math.max(0, 0 - distanceToMouse) * 0.1
-
         const mouseDisplacement = vertex.clone()
           .sub(mousePosition)
           .normalize()
           .multiplyScalar(mouseFactor)
 
-        const maxDisplacement = 1
         const totalDisplacementX = initialX * (noise1 + noise2) + mouseDisplacement.x
         const totalDisplacementY = initialY * (noise1 + noise2) + mouseDisplacement.y
         const totalDisplacementZ = initialZ * (noise1 + noise2) + mouseDisplacement.z
 
         positions.setXYZ(
           i,
-          initialX + Math.min(Math.max(-maxDisplacement, totalDisplacementX), maxDisplacement),
-          initialY + Math.min(Math.max(-maxDisplacement, totalDisplacementY), maxDisplacement),
-          initialZ + Math.min(Math.max(-maxDisplacement, totalDisplacementZ), maxDisplacement)
+          initialX + Math.min(Math.max(-1, totalDisplacementX), 1),
+          initialY + Math.min(Math.max(-1, totalDisplacementY), 1),
+          initialZ + Math.min(Math.max(-1, totalDisplacementZ), 1)
         )
       }
 
@@ -159,6 +180,31 @@ const animate = () => {
 
     blob.rotation.y += 0.010
     renderer.render(scene, camera)
+  }
+}
+
+const handleTransition = () => {
+  console.log('HomeBlob: Handling transition, current path:', route.path)
+  if (!blob || !scene) return
+
+  const duration = 0.5
+  if (route.path !== '/') {
+    gsap.to(blob.scale, {
+      x: 0,
+      y: 0,
+      z: 0,
+      duration,
+      ease: "power2.in"
+    })
+  } else {
+    blob.scale.set(0, 0, 0)
+    gsap.to(blob.scale, {
+      x: 1,
+      y: 1,
+      z: 1,
+      duration,
+      ease: "power2.out"
+    })
   }
 }
 
@@ -183,17 +229,15 @@ const handleMouseMove = (event: MouseEvent) => {
 
 const handleResize = () => {
   if (!camera || !renderer) return
-
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
-
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2))
 }
 
 watch(() => props.isDarkMode, (newValue) => {
   if (blob?.material instanceof THREE.ShaderMaterial) {
-    const targetColors = newValue ? colors.dark : colors.light;
+    const targetColors = newValue ? colors.dark : colors.light
 
     gsap.to(blob.material.uniforms.uStartColor.value, {
       r: targetColors.start.r,
@@ -201,7 +245,7 @@ watch(() => props.isDarkMode, (newValue) => {
       b: targetColors.start.b,
       duration: 0.3,
       ease: "power2.out"
-    });
+    })
 
     gsap.to(blob.material.uniforms.uEndColor.value, {
       r: targetColors.end.r,
@@ -209,11 +253,13 @@ watch(() => props.isDarkMode, (newValue) => {
       b: targetColors.end.b,
       duration: 0.3,
       ease: "power2.out"
-    });
+    })
   }
-});
+})
 
 onMounted(() => {
+  console.log('HomeBlob mounted')
+  isComponentMounted = true
   init()
   animate()
   window.addEventListener('mousemove', handleMouseMove)
@@ -221,11 +267,19 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  console.log('HomeBlob unmounting')
+  isComponentMounted = false
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId)
+  }
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('resize', handleResize)
+  cleanupThreeJS()
 })
+
+watch(() => route.path, handleTransition)
 </script>
 
 <template>
-  <canvas ref="canvasRef"></canvas>
+  <canvas ref="canvasRef" class="blob-canvas"></canvas>
 </template>

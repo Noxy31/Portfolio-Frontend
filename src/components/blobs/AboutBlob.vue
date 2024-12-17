@@ -4,24 +4,28 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import type { GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { gsap } from 'gsap'
+import { useRoute } from 'vue-router'
 
 const props = defineProps<{
   isDarkMode: boolean
 }>()
 
-// Performance settings
-const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-const performanceSettings = {
-  targetFPS: isMobile ? 30 : 60
-}
-
 const canvasRef = ref<HTMLCanvasElement | null>(null)
+const route = useRoute()
 const mousePosition = new THREE.Vector3()
 let scene: THREE.Scene
 let camera: THREE.PerspectiveCamera
 let renderer: THREE.WebGLRenderer
 let model: THREE.Mesh
 let lastTime = 0
+let isComponentMounted = true
+let animationFrameId: number | null = null
+
+// Performance settings
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+const performanceSettings = {
+  targetFPS: isMobile ? 30 : 60
+}
 
 const frameInterval = 1000 / performanceSettings.targetFPS
 const clock = new THREE.Clock()
@@ -62,7 +66,7 @@ const createShaderMaterial = () => {
       float fresnel = pow(1.0 - abs(dot(normalize(vNormal), normalize(vec3(0.0, 0.0, 1.0)))), 2.0);
       finalColor = mix(finalColor, vec3(1.0), fresnel * 0.5);
 
-      gl_FragColor = vec4(finalColor, 1);
+      gl_FragColor = vec4(finalColor, 1.0);
     }
   `
 
@@ -81,25 +85,43 @@ const createShaderMaterial = () => {
 }
 
 const loadModel = () => {
+  console.log('Loading model')
   const loader = new GLTFLoader()
   const material = createShaderMaterial()
 
   loader.load(
     '/models/scene.gltf',
     (gltf: GLTF) => {
+      console.log('Model loaded successfully')
       gltf.scene.traverse((child: THREE.Object3D) => {
         if (child instanceof THREE.Mesh) {
           model = new THREE.Mesh(child.geometry, material)
-          model.scale.set(0.7, 0.7, 0.7)
+          model.scale.set(0, 0, 0) // Start with scale 0 for initial animation
           model.rotation.x = -0.3
           scene.add(model)
+
+          // Initial animation
+          if (route.path === '/about') {
+            gsap.to(model.scale, {
+              x: 0.7,
+              y: 0.7,
+              z: 0.7,
+              duration: 0.5,
+              ease: "power2.out"
+            })
+          }
         }
       })
+    },
+    undefined,
+    (error) => {
+      console.error('Error loading model:', error)
     }
   )
 }
 
 const init = () => {
+  console.log('Initializing AboutBlob')
   scene = new THREE.Scene()
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
   camera.position.z = 5
@@ -108,7 +130,8 @@ const init = () => {
     canvas: canvasRef.value!,
     alpha: true,
     antialias: !isMobile,
-    powerPreference: "high-performance"
+    powerPreference: "high-performance",
+    preserveDrawingBuffer: true
   })
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2))
@@ -117,7 +140,9 @@ const init = () => {
 }
 
 const animate = () => {
-  requestAnimationFrame(animate)
+  if (!isComponentMounted) return
+
+  animationFrameId = requestAnimationFrame(animate)
 
   const currentTime = performance.now()
   const deltaTime = currentTime - lastTime
@@ -126,17 +151,37 @@ const animate = () => {
     lastTime = currentTime - (deltaTime % frameInterval)
     const time = clock.getElapsedTime()
 
-
-
-
     if (model.material instanceof THREE.ShaderMaterial) {
       model.material.uniforms.uTime.value = time
     }
 
     model.rotation.y += 0.01
+    renderer.render(scene, camera)
   }
+}
 
-  renderer.render(scene, camera)
+const handleTransition = () => {
+  console.log('AboutBlob: Handling transition, current path:', route.path)
+  if (!model || !scene) return
+
+  const duration = 0.5
+  if (route.path !== '/about') {
+    gsap.to(model.scale, {
+      x: 0,
+      y: 0,
+      z: 0,
+      duration,
+      ease: "power2.in"
+    })
+  } else {
+    gsap.to(model.scale, {
+      x: 0.7,
+      y: 0.7,
+      z: 0.7,
+      duration,
+      ease: "power2.out"
+    })
+  }
 }
 
 const handleMouseMove = (event: MouseEvent) => {
@@ -160,10 +205,8 @@ const handleMouseMove = (event: MouseEvent) => {
 
 const handleResize = () => {
   if (!camera || !renderer) return
-
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
-
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2))
 }
@@ -191,6 +234,8 @@ watch(() => props.isDarkMode, (newValue) => {
 })
 
 onMounted(() => {
+  console.log('AboutBlob mounted')
+  isComponentMounted = true
   init()
   animate()
   window.addEventListener('mousemove', handleMouseMove)
@@ -198,11 +243,25 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  console.log('AboutBlob unmounting')
+  isComponentMounted = false
+  if (animationFrameId !== null) {
+    cancelAnimationFrame(animationFrameId)
+  }
   window.removeEventListener('mousemove', handleMouseMove)
   window.removeEventListener('resize', handleResize)
+
+  if (model) {
+    if (model.geometry) model.geometry.dispose()
+    if (model.material instanceof THREE.Material) model.material.dispose()
+    scene?.remove(model)
+  }
+  renderer?.dispose()
 })
+
+watch(() => route.path, handleTransition)
 </script>
 
 <template>
-  <canvas ref="canvasRef"></canvas>
+  <canvas ref="canvasRef" class="blob-canvas"></canvas>
 </template>

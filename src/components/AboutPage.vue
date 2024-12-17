@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Home, UserCircle, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucide-vue-next'
 import type { LucideIcon } from 'lucide-vue-next'
 import BlobAbout from '@/components/blobs/AboutBlob.vue'
+import GlitchTransition from '@/components/GlitchTransition.vue'
 
 interface NavItem {
   icon: LucideIcon
@@ -18,7 +20,10 @@ const navItems: NavItem[] = [
 ]
 
 const isDarkMode = ref(true)
+const glitchTransition = ref<InstanceType<typeof GlitchTransition> | null>(null)
+const route = useRoute()
 
+// Watcher pour le darkMode
 watch(isDarkMode, (newValue) => {
   const root = document.documentElement;
   if (newValue) {
@@ -30,6 +35,12 @@ watch(isDarkMode, (newValue) => {
     root.style.setProperty('--text-color', '#213447');
     root.style.setProperty('--transition-duration', '0.5s');
   }
+});
+
+// Watcher pour la route pour déclencher la transition
+watch(() => route.path, () => {
+  console.log('Route changed, triggering glitch effect');
+  glitchTransition.value?.startGlitchEffect();
 });
 </script>
 
@@ -83,7 +94,12 @@ watch(isDarkMode, (newValue) => {
         </ul>
       </nav>
 
-      <BlobAbout :isDarkMode="isDarkMode" />
+      <BlobAbout :isDarkMode="isDarkMode" class="blob-canvas" />
+      <GlitchTransition
+        ref="glitchTransition"
+        :isDarkMode="isDarkMode"
+        :currentComponent="'about'"
+      />
     </div>
   </div>
 </template>

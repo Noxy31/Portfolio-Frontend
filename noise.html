@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Noise Generator</title>
+</head>
+<body>
+    <canvas id="noiseCanvas" width="256" height="256"></canvas>
+    <script>
+        const canvas = document.getElementById('noiseCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Crée un tableau de pixels avec du bruit
+        const imageData = ctx.createImageData(256, 256);
+        for (let i = 0; i < imageData.data.length; i += 4) {
+            const value = Math.random() * 255;
+            imageData.data[i] = value;     // R
+            imageData.data[i + 1] = value; // G
+            imageData.data[i + 2] = value; // B
+            imageData.data[i + 3] = 255;   // A
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+        
+        // Pour sauvegarder, clic droit sur le canvas et "Enregistrer l'image sous..."
+    </script>
+</body>
+</html>

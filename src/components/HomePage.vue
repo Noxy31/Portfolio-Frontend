@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { Home, UserCircle, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucide-vue-next'
 import type { LucideIcon } from 'lucide-vue-next'
-import HomeBlob from '../components/blobs/HomeBlob.vue'
+import HomeBlob from '@/components/blobs/HomeBlob.vue'
+import GlitchTransition from '@/components/GlitchTransition.vue'
 
 interface NavItem {
   icon: LucideIcon
@@ -17,8 +19,11 @@ const navItems: NavItem[] = [
   { icon: Mail, label: 'Contact', path: '/contact' }
 ]
 
+const glitchTransition = ref<InstanceType<typeof GlitchTransition> | null>(null)
 const isDarkMode = ref(true)
+const route = useRoute()
 
+// Watcher pour le darkMode
 watch(isDarkMode, (newValue) => {
   const root = document.documentElement;
   if (newValue) {
@@ -31,6 +36,19 @@ watch(isDarkMode, (newValue) => {
     root.style.setProperty('--transition-duration', '0.5s');
   }
 });
+
+// Watcher pour la route pour déclencher la transition
+watch(
+  () => route.path,
+  (newPath, oldPath) => {
+    console.log('Route changed in HomePage:', oldPath, '->', newPath);
+    glitchTransition.value?.startGlitchEffect();
+  },
+);
+
+onMounted(() => {
+  console.log('HomePage mounted')
+})
 </script>
 
 <template>
@@ -83,7 +101,12 @@ watch(isDarkMode, (newValue) => {
         </ul>
       </nav>
 
-      <HomeBlob :isDarkMode="isDarkMode" />
+      <HomeBlob :isDarkMode="isDarkMode" class="blob-canvas" />
+      <GlitchTransition
+        ref="glitchTransition"
+        :isDarkMode="isDarkMode"
+        :currentComponent="'home'"
+      />
     </div>
   </div>
 </template>

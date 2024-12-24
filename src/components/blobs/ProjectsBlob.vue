@@ -25,6 +25,91 @@ const colors = {
   }
 }
 
+const vertexShader = `
+  varying vec3 vNormal;
+  varying vec3 vWorldPosition;
+  void main() {
+    vNormal = normalize(normalMatrix * normal);
+    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+    vWorldPosition = worldPosition.xyz;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`
+
+const outerFragmentShader = `
+  varying vec3 vNormal;
+  varying vec3 vWorldPosition;
+  uniform float uTime;
+  uniform vec3 uStartColor;
+  uniform vec3 uEndColor;
+
+  void main() {
+    float blend = sin(vWorldPosition.y + uTime * 0.5) * 0.5 + 0.5;
+    vec3 baseColor = mix(uStartColor, uEndColor, blend);
+
+    vec3 reflection = normalize(reflect(normalize(vWorldPosition), normalize(vNormal)));
+    float reflectionIntensity = pow(1.0 - abs(dot(normalize(vNormal), reflection)), 0.8);
+
+    vec2 p = reflection.xy * 2.0;
+    float zoom = 1.5;
+    float angle = uTime * 0.1;
+    mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+
+    float pattern = 0.0;
+    for(int i = 0; i < 6; i++) {
+      p = abs(p);
+      p = p * zoom - (zoom - 1.8);
+      p *= rot;
+      pattern += 1.8/dot(p, p);
+    }
+
+    vec3 mirrorColor = vec3(0.5 + 0.5 * sin(pattern + uTime));
+    vec3 finalColor = mix(baseColor, mirrorColor, reflectionIntensity * 0.8);
+
+    gl_FragColor = vec4(finalColor, 0.7);
+  }
+`
+
+const innerFragmentShader = `
+  varying vec3 vNormal;
+  varying vec3 vWorldPosition;
+  uniform float uTime;
+  uniform vec3 uStartColor;
+  uniform vec3 uEndColor;
+
+  void main() {
+    float blend = sin(vWorldPosition.y + uTime * 0.5) * 0.5 + 0.5;
+    vec3 baseColor = mix(uStartColor, uEndColor, blend);
+
+    // Plasma effect
+    float plasma = sin(vWorldPosition.x * 10.0 + uTime) +
+                  sin(vWorldPosition.y * 12.0 + uTime * 1.2) +
+                  sin(vWorldPosition.z * 8.0 + uTime * 0.8) +
+                  sin(length(vWorldPosition) * 5.0 - uTime * 2.0);
+
+    plasma = plasma * 0.25;  // Normalize to [-1,1]
+    plasma = plasma * 0.5 + 0.5;  // Convert to [0,1]
+
+    vec3 plasmaColor = mix(uEndColor, uStartColor, plasma);
+
+    gl_FragColor = vec4(plasmaColor, 0.7);
+  }
+`
+
+const edgeFragmentShader = `
+  varying vec3 vNormal;
+  varying vec3 vWorldPosition;
+  uniform float uTime;
+  uniform vec3 uStartColor;
+  uniform vec3 uEndColor;
+
+  void main() {
+    float blend = sin(vWorldPosition.y + uTime * 0.5) * 0.5 + 0.5;
+    vec3 finalColor = mix(uStartColor, uEndColor, blend);
+    gl_FragColor = vec4(finalColor, 0.6);
+  }
+`
+
 const createEdge = (start: THREE.Vector3, end: THREE.Vector3, material: THREE.Material) => {
   const direction = end.clone().sub(start)
   const height = direction.length()
@@ -33,6 +118,7 @@ const createEdge = (start: THREE.Vector3, end: THREE.Vector3, material: THREE.Ma
   const edge = new THREE.Mesh(cylinder, material)
   edge.position.copy(start.clone().add(direction.multiplyScalar(0.5)))
   edge.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize())
+  edge.renderOrder = 1
 
   return edge
 }
@@ -41,35 +127,10 @@ const createTesseract = () => {
   const group = new THREE.Group()
   const currentColors = props.isDarkMode ? colors.dark : colors.light
 
-  const vertexShader = `
-    varying vec3 vNormal;
-    varying vec3 vWorldPosition;
-    void main() {
-      vNormal = normalize(normalMatrix * normal);
-      vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-      vWorldPosition = worldPosition.xyz;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `
-  const fragmentShader = `
-    varying vec3 vNormal;
-    varying vec3 vWorldPosition;
-    uniform float uTime;
-    uniform vec3 uStartColor;
-    uniform vec3 uEndColor;
-
-    void main() {
-      float blend = sin(vWorldPosition.y + uTime * 0.5) * 0.5 + 0.5;
-      vec3 finalColor = mix(uStartColor, uEndColor, blend);
-      float fresnel = pow(1.0 - abs(dot(normalize(vNormal), normalize(vec3(0.0, 0.0, 1.0)))), 2.0);
-      finalColor = mix(finalColor, vec3(1.0), fresnel * 0.5);
-      gl_FragColor = vec4(finalColor, 0.4);
-    }
-  `
-
-  const faceMaterial = new THREE.ShaderMaterial({
+  // Materials
+  const outerMaterial = new THREE.ShaderMaterial({
     vertexShader,
-    fragmentShader,
+    fragmentShader: outerFragmentShader,
     uniforms: {
       uTime: { value: 0 },
       uStartColor: { value: new THREE.Color().copy(currentColors.start) },
@@ -77,20 +138,35 @@ const createTesseract = () => {
     },
     transparent: true,
     side: THREE.DoubleSide,
+    depthWrite: false,
     depthTest: false
   })
 
-  const edgeMaterial = new THREE.ShaderMaterial({
+  const innerMaterial = new THREE.ShaderMaterial({
     vertexShader,
-    fragmentShader,
+    fragmentShader: innerFragmentShader,
     uniforms: {
       uTime: { value: 0 },
       uStartColor: { value: new THREE.Color().copy(currentColors.start) },
       uEndColor: { value: new THREE.Color().copy(currentColors.end) }
     },
     transparent: true,
-    depthTest: false,
-    opacity: 0.8
+    side: THREE.DoubleSide,
+    depthWrite: false,
+    depthTest: false
+  })
+
+  const edgeMaterial = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader: edgeFragmentShader,
+    uniforms: {
+      uTime: { value: 0 },
+      uStartColor: { value: new THREE.Color().copy(currentColors.start) },
+      uEndColor: { value: new THREE.Color().copy(currentColors.end) }
+    },
+    transparent: true,
+    depthWrite: false,
+    depthTest: false
   })
 
   // Inner cube vertices
@@ -119,7 +195,15 @@ const createTesseract = () => {
     new THREE.Vector3(-outerSize, outerSize, outerSize),
   ]
 
-  // Create inner cube edges
+  // Create inner cube
+  const innerGeometry = new THREE.BoxGeometry(innerSize * 2, innerSize * 2, innerSize * 2)
+  const innerCube = new THREE.Mesh(innerGeometry, innerMaterial)
+
+  // Create outer cube
+  const outerGeometry = new THREE.BoxGeometry(outerSize * 2, outerSize * 2, outerSize * 2)
+  const outerCube = new THREE.Mesh(outerGeometry, outerMaterial)
+
+  // Create edges
   const innerEdges = []
   innerEdges.push(
     createEdge(innerVertices[0], innerVertices[1], edgeMaterial),
@@ -136,7 +220,6 @@ const createTesseract = () => {
     createEdge(innerVertices[3], innerVertices[7], edgeMaterial)
   )
 
-  // Create outer cube edges
   const outerEdges = []
   outerEdges.push(
     createEdge(outerVertices[0], outerVertices[1], edgeMaterial),
@@ -153,19 +236,10 @@ const createTesseract = () => {
     createEdge(outerVertices[3], outerVertices[7], edgeMaterial)
   )
 
-  // Create connecting edges
   const connectingEdges = []
   for (let i = 0; i < 8; i++) {
     connectingEdges.push(createEdge(innerVertices[i], outerVertices[i], edgeMaterial))
   }
-
-  // Create faces for inner cube
-  const innerGeometry = new THREE.BoxGeometry(innerSize * 2, innerSize * 2, innerSize * 2)
-  const innerCube = new THREE.Mesh(innerGeometry, faceMaterial.clone())
-
-  // Create faces for outer cube
-  const outerGeometry = new THREE.BoxGeometry(outerSize * 2, outerSize * 2, outerSize * 2)
-  const outerCube = new THREE.Mesh(outerGeometry, faceMaterial.clone())
 
   // Add everything to the group
   group.add(innerCube)
@@ -192,13 +266,6 @@ const init = () => {
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-  scene.add(ambientLight)
-
-  const pointLight = new THREE.PointLight(0xffffff, 1)
-  pointLight.position.set(5, 5, 5)
-  scene.add(pointLight)
-
   tesseract = createTesseract()
   scene.add(tesseract)
 }
@@ -214,10 +281,8 @@ const animate = () => {
     tesseract.rotation.z += 0.0025
 
     tesseract.traverse((child) => {
-      if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
-        if (child.material instanceof THREE.ShaderMaterial) {
-          child.material.uniforms.uTime.value = performance.now() / 1000
-        }
+      if (child instanceof THREE.Mesh && child.material instanceof THREE.ShaderMaterial) {
+        child.material.uniforms.uTime.value = performance.now() / 1000
       }
     })
   }
@@ -237,13 +302,9 @@ watch(() => props.isDarkMode, (newValue) => {
   if (tesseract) {
     const currentColors = newValue ? colors.dark : colors.light
     tesseract.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        if (child.material instanceof THREE.ShaderMaterial) {
-          child.material.uniforms.uStartColor.value.copy(currentColors.start)
-          child.material.uniforms.uEndColor.value.copy(currentColors.end)
-        } else if (child.material instanceof THREE.MeshPhongMaterial) {
-          child.material.color = currentColors.start
-        }
+      if (child instanceof THREE.Mesh && child.material instanceof THREE.ShaderMaterial) {
+        child.material.uniforms.uStartColor.value.copy(currentColors.start)
+        child.material.uniforms.uEndColor.value.copy(currentColors.end)
       }
     })
   }

@@ -4,6 +4,7 @@ import { Home, UserCircle, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucid
 import type { LucideIcon } from 'lucide-vue-next'
 import HomeBlob from '@/components/blobs/HomeBlob.vue'
 import AboutBlob from '@/components/blobs/AboutBlob.vue'
+import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
@@ -112,10 +113,12 @@ onBeforeUnmount(() => {
     <div class="fixed w-full top-0 flex justify-end p-4 z-50">
       <label class="inline-flex items-center relative">
         <input class="peer hidden" id="toggle" type="checkbox" v-model="isDarkMode" />
-        <div class="relative w-[82px] h-[37px] bg-white peer-checked:bg-zinc-500 rounded-full after:absolute after:content-[''] after:w-[30px] after:h-[30px] after:bg-gradient-to-r from-orange-500 to-yellow-400 peer-checked:after:from-zinc-900 peer-checked:after:to-zinc-900 after:rounded-full after:top-[3.75px] after:left-[3.75px] active:after:w-[37px] peer-checked:after:left-[74.5px] peer-checked:after:translate-x-[-100%] shadow-sm duration-300 after:duration-300 after:shadow-md">
+        <div
+          class="relative w-[82px] h-[37px] bg-white peer-checked:bg-zinc-500 rounded-full after:absolute after:content-[''] after:w-[30px] after:h-[30px] after:bg-gradient-to-r from-orange-500 to-yellow-400 peer-checked:after:from-zinc-900 peer-checked:after:to-zinc-900 after:rounded-full after:top-[3.75px] after:left-[3.75px] active:after:w-[37px] peer-checked:after:left-[74.5px] peer-checked:after:translate-x-[-100%] shadow-sm duration-300 after:duration-300 after:shadow-md">
         </div>
         <LucideSun v-if="!isDarkMode" class="absolute w-5 h-5 right-[9px] text-black transition-opacity duration-300" />
-        <LucideMoon v-if="isDarkMode" class="absolute w-5 h-5 left-[9px] text-#EEE9E5 transition-opacity duration-300" />
+        <LucideMoon v-if="isDarkMode"
+          class="absolute w-5 h-5 left-[9px] text-#EEE9E5 transition-opacity duration-300" />
       </label>
     </div>
 
@@ -126,16 +129,13 @@ onBeforeUnmount(() => {
     ]">
       <ul class="flex flex-col gap-8">
         <li v-for="item in navItems" :key="item.id" class="w-full flex justify-center">
-          <button
-            @click="scrollToSection(item.id)"
+          <button @click="scrollToSection(item.id)"
             class="w-[48px] flex flex-col items-center gap-2 group transition-all duration-300">
-            <component :is="item.icon"
-              class="w-6 h-6 transition-colors duration-300"
-              :style="{
-                color: isDarkMode
-                  ? currentSection === item.id ? activeColors.dark : '#AEB7BC'
-                  : currentSection === item.id ? activeColors.light : '#6B7280',
-              }" />
+            <component :is="item.icon" class="w-6 h-6 transition-colors duration-300" :style="{
+              color: isDarkMode
+                ? currentSection === item.id ? activeColors.dark : '#AEB7BC'
+                : currentSection === item.id ? activeColors.light : '#6B7280',
+            }" />
             <span class="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               :style="{ color: isDarkMode ? activeColors.dark : activeColors.light }">
               {{ item.label }}
@@ -148,26 +148,23 @@ onBeforeUnmount(() => {
     <main class="relative overflow-x-hidden">
       <section id="home" class="min-h-screen relative flex items-center justify-center">
         <div class="absolute inset-0 flex items-center justify-center">
-          <HomeBlob
-            :isDarkMode="isDarkMode"
-            :isVisible="sectionVisibility['home'] || 0"
-          />
+          <HomeBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['home'] || 0" />
         </div>
       </section>
 
       <section id="about" class="min-h-screen relative flex items-center justify-center">
         <div class="absolute inset-0 flex items-center justify-center">
-          <AboutBlob
-            :isDarkMode="isDarkMode"
-            :isVisible="sectionVisibility['about'] || 0"
-          />
+          <AboutBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['about'] || 0" />
         </div>
       </section>
 
       <section id="projects" class="min-h-screen relative flex items-center justify-center">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['projects'] || 0" />
+        </div>
         <div class="relative z-10 text-center">
           <h2 class="text-5xl font-bold mb-4" :style="{ color: isDarkMode ? '#EEE9E5' : '#213447' }">
-            Projects
+
           </h2>
         </div>
       </section>

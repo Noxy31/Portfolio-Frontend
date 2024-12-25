@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-vue-next'
 import HomeBlob from '@/components/blobs/HomeBlob.vue'
 import AboutBlob from '@/components/blobs/AboutBlob.vue'
 import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue'
+import ContactBlob from './blobs/ContactBlob.vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
@@ -170,10 +171,8 @@ onBeforeUnmount(() => {
       </section>
 
       <section id="contact" class="min-h-screen relative flex items-center justify-center">
-        <div class="relative z-10 text-center">
-          <h2 class="text-5xl font-bold mb-4" :style="{ color: isDarkMode ? '#EEE9E5' : '#213447' }">
-            Contact
-          </h2>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <ContactBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['contact'] || 0" />
         </div>
       </section>
     </main>

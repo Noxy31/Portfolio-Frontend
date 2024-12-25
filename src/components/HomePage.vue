@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
-import { Home, UserCircle, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucide-vue-next'
+import { Home, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucide-vue-next'
 import type { LucideIcon } from 'lucide-vue-next'
 import HomeBlob from '@/components/blobs/HomeBlob.vue'
-import AboutBlob from '@/components/blobs/AboutBlob.vue'
 import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue'
 import ContactBlob from './blobs/ContactBlob.vue'
 import { gsap } from 'gsap'
@@ -12,6 +11,30 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
+// Mouse glow
+const mouseX = ref(0)
+const mouseY = ref(0)
+const isGlowVisible = ref(false)
+
+const updateMousePosition = (event: MouseEvent) => {
+  if (event.target && isElementOrAncestor(event.target as HTMLElement, 'main')) {
+    isGlowVisible.value = true
+    requestAnimationFrame(() => {
+      mouseX.value = event.clientX
+      mouseY.value = event.clientY
+    })
+  } else {
+    isGlowVisible.value = false
+  }
+}
+
+const isElementOrAncestor = (element: HTMLElement, targetClass: string): boolean => {
+  if (!element) return false
+  if (element.tagName.toLowerCase() === targetClass) return true
+  return element.parentElement ? isElementOrAncestor(element.parentElement, targetClass) : false
+}
+
+// Reste du code existant
 interface NavItem {
   icon: LucideIcon
   label: string
@@ -23,10 +46,8 @@ const activeColors = {
   light: '#9D8EC1'
 }
 
-
 const navItems: NavItem[] = [
   { icon: Home, label: 'Home', id: 'home' },
-  { icon: UserCircle, label: 'About', id: 'about' },
   { icon: FolderOpen, label: 'Projects', id: 'projects' },
   { icon: Mail, label: 'Contact', id: 'contact' }
 ]
@@ -53,16 +74,13 @@ watch(isDarkMode, (newValue) => {
 const setupScrollObserver = () => {
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      // Mettre à jour le ratio de visibilité pour chaque section
       sectionVisibility.value[entry.target.id] = entry.intersectionRatio
-
-      // Mettre à jour la section courante si elle est la plus visible
       if (entry.intersectionRatio > 0.5) {
         currentSection.value = entry.target.id
       }
     })
   }, {
-    threshold: Array.from({ length: 101 }, (_, i) => i / 100) // Crée des seuils de 0 à 1 par pas de 0.01
+    threshold: Array.from({ length: 101 }, (_, i) => i / 100)
   })
 
   sections.value.forEach(section => {
@@ -84,8 +102,9 @@ const scrollToSection = (id: string) => {
 onMounted(() => {
   sections.value = Array.from(document.querySelectorAll('section'))
   setupScrollObserver()
-  // Initialiser la première section comme visible
   sectionVisibility.value['home'] = 1
+  // Ajout de l'écouteur d'événement pour le glow
+  window.addEventListener('mousemove', updateMousePosition)
 })
 
 onBeforeUnmount(() => {
@@ -95,18 +114,36 @@ onBeforeUnmount(() => {
     })
     observer.disconnect()
   }
+  // Supprimer l'écouteur d'événement pour le glow
+  window.removeEventListener('mousemove', updateMousePosition)
 })
 </script>
 
 <template>
-  <div class="wrapper overflow-hidden">
+  <div class="relative min-h-screen overflow-hidden">
+    <!-- Mouse Glow -->
+    <div class="pointer-events-none fixed inset-0 z-30" :style="{ opacity: isGlowVisible ? 1 : 0 }">
+      <div class="absolute" :style="{
+        left: `${mouseX}px`,
+        top: `${mouseY}px`,
+      }">
+        <div class="absolute w-3 h-3 rounded-full animate-orbit transition-colors duration-700 shadow-lg" :class="[
+          isDarkMode
+            ? 'bg-gradient-to-br from-[#6EA8CC] to-[#6A4C93] shadow-[#6EA8CC]/50'
+            : 'bg-gradient-to-br from-[#3C5B80] to-[#372860] shadow-[#3C5B80]/50'
+        ]" :style="{
+        filter: 'drop-shadow(0 0 4px currentColor)'
+      }" />
+      </div>
+    </div>
+
     <!-- Fonds identiques -->
     <div :class="[
-      'background-layer light-bg transition-all duration-700 ease-in-out fixed inset-0 -z-10',
+      'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#6EA8CC] to-[#EEE9E5]',
       isDarkMode ? 'opacity-0' : 'opacity-100'
     ]" />
     <div :class="[
-      'background-layer dark-bg transition-all duration-700 ease-in-out fixed inset-0 -z-10',
+      'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#213447] to-[#212A31]',
       isDarkMode ? 'opacity-100' : 'opacity-0'
     ]" />
 
@@ -119,19 +156,19 @@ onBeforeUnmount(() => {
         </div>
         <LucideSun v-if="!isDarkMode" class="absolute w-5 h-5 right-[9px] text-black transition-opacity duration-300" />
         <LucideMoon v-if="isDarkMode"
-          class="absolute w-5 h-5 left-[9px] text-#EEE9E5 transition-opacity duration-300" />
+          class="absolute w-5 h-5 left-[9px] text-[#EEE9E5] transition-opacity duration-300" />
       </label>
     </div>
 
+    <!-- Navigation -->
     <nav :class="[
-      'fixed left-8 top-1/2 -translate-y-1/2 p-4 rounded-2xl z-50',
-      'transition-all duration-500 ease-in-out',
+      'fixed left-8 top-1/2 -translate-y-1/2 p-4 rounded-2xl z-50 transition-all duration-500 ease-in-out',
       isDarkMode ? 'bg-[rgba(33,42,49,0.8)]' : 'bg-[rgba(255,255,255,0.8)]'
     ]">
-      <ul class="flex flex-col gap-8">
+      <ul class="flex flex-col gap-8 m-0 p-0 list-none w-full">
         <li v-for="item in navItems" :key="item.id" class="w-full flex justify-center">
           <button @click="scrollToSection(item.id)"
-            class="w-[48px] flex flex-col items-center gap-2 group transition-all duration-300">
+            class="w-[48px] flex flex-col items-center gap-2 group transition-all duration-300 m-0 p-0">
             <component :is="item.icon" class="w-6 h-6 transition-colors duration-300" :style="{
               color: isDarkMode
                 ? currentSection === item.id ? activeColors.dark : '#AEB7BC'
@@ -146,31 +183,25 @@ onBeforeUnmount(() => {
       </ul>
     </nav>
 
-    <main class="relative overflow-x-hidden">
-      <section id="home" class="min-h-screen relative flex items-center justify-center">
+    <!-- Main Content -->
+    <main class="relative overflow-x-hidden h-screen overflow-y-auto snap-y snap-mandatory">
+      <section id="home" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
         <div class="absolute inset-0 flex items-center justify-center">
           <HomeBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['home'] || 0" />
         </div>
       </section>
 
-      <section id="about" class="min-h-screen relative flex items-center justify-center">
-        <div class="absolute inset-0 flex items-center justify-center">
-          <AboutBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['about'] || 0" />
-        </div>
-      </section>
-
-      <section id="projects" class="min-h-screen relative flex items-center justify-center">
+      <section id="projects" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
         <div class="absolute inset-0 flex items-center justify-center">
           <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['projects'] || 0" />
         </div>
         <div class="relative z-10 text-center">
           <h2 class="text-5xl font-bold mb-4" :style="{ color: isDarkMode ? '#EEE9E5' : '#213447' }">
-
           </h2>
         </div>
       </section>
 
-      <section id="contact" class="min-h-screen relative flex items-center justify-center">
+      <section id="contact" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
         <div class="absolute inset-0 flex items-center justify-center">
           <ContactBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['contact'] || 0" />
         </div>
@@ -178,48 +209,3 @@ onBeforeUnmount(() => {
     </main>
   </div>
 </template>
-
-<style scoped>
-.wrapper {
-  position: relative;
-  min-height: 100vh;
-}
-
-.background-layer {
-  width: 100%;
-  height: 100%;
-}
-
-.light-bg {
-  background: linear-gradient(to bottom right, #6EA8CC, #EEE9E5);
-}
-
-.dark-bg {
-  background: linear-gradient(to bottom right, #213447, #212A31);
-}
-
-nav ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  width: 100%;
-}
-
-nav button {
-  margin: 0;
-  padding: 0;
-}
-
-section {
-  position: relative;
-  overflow: hidden;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-
-main {
-  height: 100vh;
-  overflow-y: auto;
-  scroll-snap-type: y mandatory;
-}
-</style>

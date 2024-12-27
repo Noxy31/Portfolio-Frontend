@@ -96,20 +96,15 @@ const openPdf = (url: string) => {
 <template>
   <div class="relative w-full max-w-[1920px] mx-auto flex items-center mt-16">
     <div class="w-full md:w-[40%] flex flex-col gap-8 md:gap-16 px-4 md:pl-[6%] lg:pl-[8%]">
-      <ProjectCard v-for="(project, index) in leftProjects"
-        :key="project.id"
-        :project="project"
-        :isDarkMode="isDarkMode"
-        :class="[
+      <ProjectCard v-for="(project, index) in leftProjects" :key="project.id" :project="project"
+        :isDarkMode="isDarkMode" :class="[
           'transform transition-all duration-500',
           { 'translate-x-[-100px] opacity-0': !isVisible },
           { 'translate-x-0 opacity-100': isVisible },
           { 'transition-delay-100': index === 0 },
           { 'transition-delay-200': index === 1 },
           { 'transition-delay-300': index === 2 }
-        ]"
-        @openModal="selectedProject = $event"
-      />
+        ]" @openModal="selectedProject = $event" />
     </div>
 
     <div class="w-[40%] flex items-center justify-center">
@@ -117,20 +112,15 @@ const openPdf = (url: string) => {
     </div>
 
     <div class="w-full md:w-[40%] flex flex-col gap-8 md:gap-16 px-4 md:pr-[6%] lg:pr-[8%]">
-      <ProjectCard v-for="(project, index) in rightProjects"
-        :key="project.id"
-        :project="project"
-        :isDarkMode="isDarkMode"
-        :class="[
+      <ProjectCard v-for="(project, index) in rightProjects" :key="project.id" :project="project"
+        :isDarkMode="isDarkMode" :class="[
           'transform transition-all duration-500',
           { 'translate-x-[100px] opacity-0': !isVisible },
           { 'translate-x-0 opacity-100': isVisible },
           { 'transition-delay-100': index === 0 },
           { 'transition-delay-200': index === 1 },
           { 'transition-delay-300': index === 2 }
-        ]"
-        @openModal="selectedProject = $event"
-      />
+        ]" @openModal="selectedProject = $event" />
     </div>
 
     <!-- Modal -->
@@ -149,13 +139,14 @@ const openPdf = (url: string) => {
           <p class="mb-8 text-lg" :class="isDarkMode ? 'text-[#AEB7BC]' : 'text-[#6B7280]'">
             {{ selectedProject.description }}
           </p>
-          <div class="flex justify-between gap-16 px-32">
+          <div class="flex flex-row justify-center gap-4 px-4 md:gap-16 md:px-32">
             <button @click="openPdf(selectedProject.schemaUrl)"
-              class="px-6 py-3 rounded-lg font-medium transition-colors"
+              class="flex-1 px-4 md:px-6 py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
               :class="isDarkMode ? 'bg-[#6EA8CC] text-white' : 'bg-[#3C5B80] text-white'">
               Voir Schéma d'Architecture Technique
             </button>
-            <button @click="openPdf(selectedProject.docUrl)" class="px-6 py-3 rounded-lg font-medium transition-colors"
+            <button @click="openPdf(selectedProject.docUrl)"
+              class="flex-1 px-4 md:px-6 py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
               :class="isDarkMode ? 'bg-[#6A4C93] text-white' : 'bg-[#372860] text-white'">
               Voir Documentation Fonctionnelle
             </button>

@@ -4,14 +4,14 @@
 
 @font-face {
     font-family: 'bold';
-    src: url('/fonts/Montserrat-BoldItalic.ttf') format('truetype');
+    src: url('../assets/Fonts/conduck.otf') format('truetype');
     font-weight: bold;
     font-style: normal;
   }
   
   @font-face {
     font-family: 'medium';
-    src: url('/fonts/Montserrat-Medium.ttf') format('truetype');
+    src: url('../assets/Fonts/HelveticaNeueMedium.otf') format('truetype');
     font-weight: normal;
     font-style: normal;
   }

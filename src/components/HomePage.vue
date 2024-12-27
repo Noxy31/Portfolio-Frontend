@@ -2,16 +2,17 @@
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { Home, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucide-vue-next'
 import type { LucideIcon } from 'lucide-vue-next'
+import ScrollIndicator from '@/components/ScrollIndicator.vue';
 import HomeBlob from '@/components/blobs/HomeBlob.vue'
 import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue'
 import ContactBlob from './blobs/ContactBlob.vue'
+import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
-// Mouse glow
 const mouseX = ref(0)
 const mouseY = ref(0)
 const isGlowVisible = ref(false)
@@ -34,7 +35,6 @@ const isElementOrAncestor = (element: HTMLElement, targetClass: string): boolean
   return element.parentElement ? isElementOrAncestor(element.parentElement, targetClass) : false
 }
 
-// Reste du code existant
 interface NavItem {
   icon: LucideIcon
   label: string
@@ -103,7 +103,6 @@ onMounted(() => {
   sections.value = Array.from(document.querySelectorAll('section'))
   setupScrollObserver()
   sectionVisibility.value['home'] = 1
-  // Ajout de l'écouteur d'événement pour le glow
   window.addEventListener('mousemove', updateMousePosition)
 })
 
@@ -114,14 +113,12 @@ onBeforeUnmount(() => {
     })
     observer.disconnect()
   }
-  // Supprimer l'écouteur d'événement pour le glow
   window.removeEventListener('mousemove', updateMousePosition)
 })
 </script>
 
 <template>
   <div class="relative min-h-screen overflow-hidden">
-    <!-- Mouse Glow -->
     <div class="pointer-events-none fixed inset-0 z-30" :style="{ opacity: isGlowVisible ? 1 : 0 }">
       <div class="absolute" :style="{
         left: `${mouseX}px`,
@@ -132,12 +129,11 @@ onBeforeUnmount(() => {
             ? 'bg-gradient-to-br from-[#6EA8CC] to-[#6A4C93] shadow-[#6EA8CC]/50'
             : 'bg-gradient-to-br from-[#3C5B80] to-[#372860] shadow-[#3C5B80]/50'
         ]" :style="{
-        filter: 'drop-shadow(0 0 4px currentColor)'
-      }" />
+          filter: 'drop-shadow(0 0 4px currentColor)'
+        }" />
       </div>
     </div>
 
-    <!-- Fonds identiques -->
     <div :class="[
       'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#6EA8CC] to-[#EEE9E5]',
       isDarkMode ? 'opacity-0' : 'opacity-100'
@@ -147,7 +143,6 @@ onBeforeUnmount(() => {
       isDarkMode ? 'opacity-100' : 'opacity-0'
     ]" />
 
-    <!-- Le header modifié -->
     <div class="fixed w-full top-0 flex justify-end p-4 z-50">
       <label class="inline-flex items-center relative">
         <input class="peer hidden" id="toggle" type="checkbox" v-model="isDarkMode" />
@@ -160,9 +155,8 @@ onBeforeUnmount(() => {
       </label>
     </div>
 
-    <!-- Navigation -->
     <nav :class="[
-      'fixed left-8 top-1/2 -translate-y-1/2 p-4 rounded-2xl z-50 transition-all duration-500 ease-in-out',
+      'fixed left-8 top-1/2 -translate-y-1/2 p-4 rounded-2xl z-50 transition-all duration-500 ease-in-out hidden md:block',
       isDarkMode ? 'bg-[rgba(33,42,49,0.8)]' : 'bg-[rgba(255,255,255,0.8)]'
     ]">
       <ul class="flex flex-col gap-8 m-0 p-0 list-none w-full">
@@ -183,13 +177,14 @@ onBeforeUnmount(() => {
       </ul>
     </nav>
 
-    <!-- Main Content -->
     <main class="relative overflow-x-hidden h-screen overflow-y-auto snap-y snap-mandatory">
       <section id="home" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
-        <div class="absolute inset-0 flex items-center justify-center">
-          <HomeBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['home'] || 0" />
-        </div>
-      </section>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <HomeBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['home'] || 0" />
+    </div>
+    <AnimatedTitle :isDarkMode="isDarkMode" />
+    <ScrollIndicator :isDarkMode="isDarkMode" />
+  </section>
 
       <section id="projects" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
         <div class="absolute inset-0 flex items-center justify-center">

@@ -7,6 +7,8 @@ import HomeBlob from '@/components/blobs/HomeBlob.vue'
 import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue'
 import ContactBlob from './blobs/ContactBlob.vue'
 import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue'
+import ProjectCards from '../components/ProjectCards.vue';
+import ContactTitle from '../components/Titles/ContactTitle.vue';
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
@@ -143,7 +145,12 @@ onBeforeUnmount(() => {
       isDarkMode ? 'opacity-100' : 'opacity-0'
     ]" />
 
-    <div class="fixed w-full top-0 flex justify-end p-4 z-50">
+    <div :class="[
+      'fixed w-full top-0 flex justify-end p-4 z-50 transition-all duration-300 ease-in-out',
+      currentSection !== 'home'
+        ? 'opacity-0 translate-y-[-100%] md:opacity-100 md:translate-y-0'
+        : 'opacity-100 translate-y-0'
+    ]">
       <label class="inline-flex items-center relative">
         <input class="peer hidden" id="toggle" type="checkbox" v-model="isDarkMode" />
         <div
@@ -179,26 +186,36 @@ onBeforeUnmount(() => {
 
     <main class="relative overflow-x-hidden h-screen overflow-y-auto snap-y snap-mandatory">
       <section id="home" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
-    <div class="absolute inset-0 flex items-center justify-center">
-      <HomeBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['home'] || 0" />
-    </div>
-    <AnimatedTitle :isDarkMode="isDarkMode" />
-    <ScrollIndicator :isDarkMode="isDarkMode" />
-  </section>
-
-      <section id="projects" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
         <div class="absolute inset-0 flex items-center justify-center">
-          <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['projects'] || 0" />
+          <HomeBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['home'] || 0" />
         </div>
-        <div class="relative z-10 text-center">
-          <h2 class="text-5xl font-bold mb-4" :style="{ color: isDarkMode ? '#EEE9E5' : '#213447' }">
+        <AnimatedTitle :isDarkMode="isDarkMode" />
+        <ScrollIndicator :isDarkMode="isDarkMode" />
+      </section>
+
+      <section id="projects" class="min-h-screen relative snap-start snap-always">
+        <div class="absolute inset-0 flex items-center justify-center">
+          <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])" />
+        </div>
+        <div class="relative z-10 w-full flex flex-col">
+          <h2
+            class="text-8xl sm:text-8xl md:text-[8rem] lg:text-[12rem] xl:text-[14rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+            :class="{ 'text-[#AEB7BC]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+            Projets
           </h2>
+          <div class="flex-1 flex items-center">
+            <ProjectCards :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])">
+            </ProjectCards>
+          </div>
         </div>
       </section>
 
-      <section id="contact" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
+      <section id="contact" class="min-h-screen relative snap-start snap-always">
         <div class="absolute inset-0 flex items-center justify-center">
           <ContactBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['contact'] || 0" />
+        </div>
+        <div class="relative z-10 w-full h-full">
+          <ContactTitle :isDarkMode="isDarkMode" />
         </div>
       </section>
     </main>

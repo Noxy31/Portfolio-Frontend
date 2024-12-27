@@ -30,8 +30,8 @@ const projects = ref<Project[]>([
     id: 1,
     title: "Organiz'Heure",
     description: "WebApp - Organiz'Heure est une application web de gestion de tâches sous forme de To-Do list. L'application permet de créer des tâches, de les organiser par catégories, de les marquer comme terminées et de les archiver. L'application possède une vue Administrateur et une vue Employé, elle est responsive et fonctionne sur tous les appareils.",
-    imageout: '../src/assets/Logo/Logo-OrganizHeure.png',
-    imagein: '../src/assets/Logo/OHExhibit.png',
+    imageout: '/logo/Logo-OrganizHeure.png',
+    imagein: '/logo/OHExhibit.png',
     schemaUrl: '/path/to/schema1.pdf',
     docUrl: '/path/to/doc1.pdf'
   },
@@ -39,7 +39,7 @@ const projects = ref<Project[]>([
     id: 2,
     title: "Deliver'Easy",
     description: "WebApp - Deliver'Easy est une application web de gestion de livraisons. L'application permet de créer des commandes, de les affecter à des livreurs, de suivre les livraisons en temps réel et de générer des rapports. L'application possède une vue Administrateur et une vue Livreur sur mobile, elle est responsive et fonctionne sur tous les appareils.",
-    imageout: '../src/assets/Logo/Logo-DE.png',
+    imageout: '/logo/Logo-DE.png',
     imagein: '/path/to/image2.jpg',
     schemaUrl: '/path/to/schema2.pdf',
     docUrl: '/path/to/doc2.pdf'

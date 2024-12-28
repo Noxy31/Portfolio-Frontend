@@ -40,7 +40,7 @@ const projects = ref<Project[]>([
     title: "Deliver'Easy",
     description: "WebApp - Deliver'Easy est une application web de gestion de livraisons. L'application permet de créer des commandes, de les affecter à des livreurs, de suivre les livraisons en temps réel et de générer des rapports. L'application possède une vue Administrateur et une vue Livreur sur mobile, elle est responsive et fonctionne sur tous les appareils.",
     imageout: '/logo/Logo-DE.png',
-    imagein: '/path/to/image2.jpg',
+    imagein: '/logo/DE-Exhibit.png',
     schemaUrl: '/path/to/schema2.pdf',
     docUrl: '/path/to/doc2.pdf'
   },

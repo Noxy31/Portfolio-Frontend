@@ -95,62 +95,95 @@ const openPdf = (url: string) => {
 <template>
   <div class="relative w-full max-w-[1920px] mx-auto flex items-center mt-16">
     <div class="w-full md:w-[40%] flex flex-col gap-8 md:gap-16 px-4 md:pl-[6%] lg:pl-[8%]">
-      <ProjectCard v-for="(project, index) in leftProjects" :key="project.id" :project="project"
-        :isDarkMode="isDarkMode" :class="[
+      <ProjectCard
+        v-for="(project, index) in leftProjects"
+        :key="project.id"
+        :project="project"
+        :isDarkMode="isDarkMode"
+        :class="[
           'transform transition-all duration-500',
           { 'translate-x-[-100px] opacity-0': !isVisible },
           { 'translate-x-0 opacity-100': isVisible },
           { 'transition-delay-100': index === 0 },
           { 'transition-delay-200': index === 1 },
           { 'transition-delay-300': index === 2 }
-        ]" @openModal="selectedProject = $event" />
+        ]"
+        @openModal="selectedProject = $event"
+      />
     </div>
-
     <div class="w-[40%] flex items-center justify-center">
       <slot></slot>
     </div>
-
     <div class="w-full md:w-[40%] flex flex-col gap-8 md:gap-16 px-4 md:pr-[6%] lg:pr-[8%]">
-      <ProjectCard v-for="(project, index) in rightProjects" :key="project.id" :project="project"
-        :isDarkMode="isDarkMode" :class="[
+      <ProjectCard
+        v-for="(project, index) in rightProjects"
+        :key="project.id"
+        :project="project"
+        :isDarkMode="isDarkMode"
+        :class="[
           'transform transition-all duration-500',
           { 'translate-x-[100px] opacity-0': !isVisible },
           { 'translate-x-0 opacity-100': isVisible },
           { 'transition-delay-100': index === 0 },
           { 'transition-delay-200': index === 1 },
           { 'transition-delay-300': index === 2 }
-        ]" @openModal="selectedProject = $event" />
+        ]"
+        @openModal="selectedProject = $event"
+      />
     </div>
 
     <!-- Modal -->
     <Transition name="modal">
-      <div v-if="selectedProject" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div v-if="selectedProject" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="selectedProject = null"></div>
-        <div class="relative w-[90vw] max-w-7xl max-h-7xl p-8 rounded-xl transform transition-all font-primary"
+        <div class="relative w-[90vw] max-w-7xl h-auto max-h-[90vh] p-4 md:p-8 rounded-xl transform transition-all font-primary"
           :class="isDarkMode ? 'bg-[rgba(33,42,49,0.95)]' : 'bg-[rgba(255,255,255,0.95)]'">
-          <div class="max-h-[60vh] mb-6 flex items-center justify-center">
-            <img :src="selectedProject.imagein" :alt="selectedProject.title"
-              class="w-full h-auto max-h-full object-contain rounded-lg">
+
+          <div class="h-full flex flex-col">
+            <div class="flex-1 flex flex-col items-center justify-start">
+              <img
+                :src="selectedProject.imagein"
+                :alt="selectedProject.title"
+                class="w-full max-h-[45vh] object-contain rounded-lg mb-4"
+              >
+
+              <h2
+                class="text-2xl md:text-3xl font-bold mb-2 md:mb-4"
+                :class="isDarkMode ? 'text-[#EEE9E5]' : 'text-[#213447]'"
+              >
+                {{ selectedProject.title }}
+              </h2>
+
+              <p
+                class="text-base md:text-lg mb-4 md:mb-8"
+                :class="isDarkMode ? 'text-[#AEB7BC]' : 'text-[#6B7280]'"
+              >
+                {{ selectedProject.description }}
+              </p>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-center gap-4 px-2 md:gap-16 md:px-32">
+              <button
+                @click="openPdf(selectedProject.schemaUrl)"
+                class="flex-1 px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
+                :class="isDarkMode ? 'bg-[#6EA8CC] text-white' : 'bg-[#3C5B80] text-white'"
+              >
+                Voir Schéma d'Architecture Technique
+              </button>
+              <button
+                @click="openPdf(selectedProject.docUrl)"
+                class="flex-1 px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
+                :class="isDarkMode ? 'bg-[#6A4C93] text-white' : 'bg-[#372860] text-white'"
+              >
+                Voir Documentation Fonctionnelle
+              </button>
+            </div>
           </div>
-          <h2 class="text-3xl font-bold mb-4" :class="isDarkMode ? 'text-[#EEE9E5]' : 'text-[#213447]'">
-            {{ selectedProject.title }}
-          </h2>
-          <p class="mb-8 text-lg" :class="isDarkMode ? 'text-[#AEB7BC]' : 'text-[#6B7280]'">
-            {{ selectedProject.description }}
-          </p>
-          <div class="flex flex-row justify-center gap-4 px-4 md:gap-16 md:px-32">
-            <button @click="openPdf(selectedProject.schemaUrl)"
-              class="flex-1 px-4 md:px-6 py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
-              :class="isDarkMode ? 'bg-[#6EA8CC] text-white' : 'bg-[#3C5B80] text-white'">
-              Voir Schéma d'Architecture Technique
-            </button>
-            <button @click="openPdf(selectedProject.docUrl)"
-              class="flex-1 px-4 md:px-6 py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
-              :class="isDarkMode ? 'bg-[#6A4C93] text-white' : 'bg-[#372860] text-white'">
-              Voir Documentation Fonctionnelle
-            </button>
-          </div>
-          <button @click="selectedProject = null" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
+
+          <button
+            @click="selectedProject = null"
+            class="absolute top-2 right-2 md:top-4 md:right-4 text-gray-500 hover:text-gray-700"
+          >
             <span class="sr-only">Fermer</span>×
           </button>
         </div>

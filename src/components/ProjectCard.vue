@@ -33,7 +33,7 @@ defineEmits<{
     class="w-full rounded-xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-300"
     :class="isDarkMode ? 'bg-[rgba(33,42,49,0.8)]' : 'bg-[rgba(255,255,255,0.8)]'"
   >
-    <div class="h-28 sm:h-32 md:h-40 overflow-hidden">
+    <div class="h-[8vw]  overflow-hidden">
       <img :src="project.imageout" :alt="project.title" class="w-full h-full object-cover">
     </div>
     <div class="p-2 sm:p-4 flex justify-center">

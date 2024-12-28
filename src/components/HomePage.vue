@@ -199,7 +199,7 @@ onBeforeUnmount(() => {
         </div>
         <div class="relative z-10 w-full flex flex-col">
           <h2
-            class="text-8xl sm:text-8xl md:text-[8rem] lg:text-[12rem] xl:text-[14rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+            class="text-8xl sm:text-8xl md:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
             :class="{ 'text-[#AEB7BC]': isDarkMode, 'text-[#213447]': !isDarkMode }">
             Projets
           </h2>

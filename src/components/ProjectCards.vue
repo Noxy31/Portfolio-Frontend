@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import type { PropType } from 'vue';
-import ProjectCard from '@/components/ProjectCard.vue';
+import { ref, watch } from 'vue'
+import type { PropType } from 'vue'
+import ProjectCard from './ProjectCard.vue'
 
 interface Project {
-  id: number;
-  title: string;
-  description: string;
-  imageout: string;
-  imagein: string;
-  schemaUrl: string;
-  docUrl: string;
+  id: number
+  title: string
+  description: string
+  imageout: string
+  imagein: string
+  schemaUrl: string
+  docUrl: string
 }
 
 defineProps({
@@ -22,14 +22,14 @@ defineProps({
     type: Boolean as PropType<boolean>,
     default: false
   }
-});
+})
 
-const selectedProject = ref<Project | null>(null);
+const selectedProject = ref<Project | null>(null)
 const projects = ref<Project[]>([
   {
     id: 1,
     title: "Organiz'Heure",
-    description: "WebApp - Organiz'Heure est une application web de gestion de tâches sous forme de To-Do list. L'application permet de créer des tâches, de les organiser par catégories, de les marquer comme terminées et de les archiver. L'application possède une vue Administrateur et une vue Employé, elle est responsive et fonctionne sur tous les appareils.",
+    description: "WebApp - Organiz'Heure est une application web de gestion de tâches sous forme de To-Do list.",
     imageout: '/logo/Logo-OrganizHeure.png',
     imagein: '/logo/OHExhibit.png',
     schemaUrl: '/path/to/schema1.pdf',
@@ -38,7 +38,7 @@ const projects = ref<Project[]>([
   {
     id: 2,
     title: "Deliver'Easy",
-    description: "WebApp - Deliver'Easy est une application web de gestion de livraisons. L'application permet de créer des commandes, de les affecter à des livreurs, de suivre les livraisons en temps réel et de générer des rapports. L'application possède une vue Administrateur et une vue Livreur sur mobile, elle est responsive et fonctionne sur tous les appareils.",
+    description: "WebApp - Deliver'Easy est une application de gestion de livraisons.",
     imageout: '/logo/Logo-DE.png',
     imagein: '/logo/DE-Exhibit.png',
     schemaUrl: '/path/to/schema2.pdf',
@@ -47,7 +47,7 @@ const projects = ref<Project[]>([
   {
     id: 3,
     title: 'Nurse Care',
-    description: 'Description...',
+    description: 'Application mobile de soins.',
     imageout: '/path/to/image3.jpg',
     imagein: '/path/to/image3.jpg',
     schemaUrl: '/path/to/schema3.pdf',
@@ -55,82 +55,87 @@ const projects = ref<Project[]>([
   },
   {
     id: 4,
-    title: 'Project 4',
-    description: 'Description...',
-    imageout: '/path/to/image4.jpg',
-    imagein: '/path/to/image4.jpg',
-    schemaUrl: '/path/to/schema4.pdf',
-    docUrl: '/path/to/doc4.pdf'
+    title: 'Ticky',
+    description: 'MobileApp - Ticky est une application mobile de ticketing.',
+    imageout: '/path/to/image3.jpg',
+    imagein: '/path/to/image3.jpg',
+    schemaUrl: '/path/to/schema3.pdf',
+    docUrl: '/path/to/doc3.pdf'
   },
-  {
-    id: 5,
-    title: 'Project 5',
-    description: 'Description...',
-    imageout: '/path/to/image5.jpg',
-    imagein: '/path/to/image5.jpg',
-    schemaUrl: '/path/to/schema5.pdf',
-    docUrl: '/path/to/doc5.pdf'
-  },
-  {
-    id: 6,
-    title: 'Project 6',
-    description: 'Description...',
-    imageout: '/path/to/image6.jpg',
-    imagein: '/path/to/image6.jpg',
-    schemaUrl: '/path/to/schema6.pdf',
-    docUrl: '/path/to/doc6.pdf'
-  }
-]);
-
-const leftProjects = computed(() => projects.value.slice(0, 3));
-const rightProjects = computed(() => projects.value.slice(3, 6));
+])
 
 const openPdf = (url: string) => {
   if (typeof window !== 'undefined') {
-    window.open(url, '_blank');
+    window.open(url, '_blank')
   }
-};
+}
+
+// Watcher pour gérer le défilement et la navbar/toggle
+watch(selectedProject, (newVal) => {
+  if (newVal) {
+    document.body.style.overflow = 'hidden' // Empêche le scroll
+    // Cacher la navbar et toggle ici (ajuste ces éléments selon ton code)
+    const navbar = document.getElementById('navbar')
+    if (navbar) navbar.style.display = 'none'
+    const toggle = document.getElementById('color-mode-toggle')
+    if (toggle) toggle.style.display = 'none'
+  } else {
+    document.body.style.overflow = '' // Réactive le scroll
+    // Afficher la navbar et toggle
+    const navbar = document.getElementById('navbar')
+    if (navbar) navbar.style.display = ''
+    const toggle = document.getElementById('color-mode-toggle')
+    if (toggle) toggle.style.display = ''
+  }
+})
+
+// Fonction pour ouvrir la modal avec le projet
+const openModal = (project: Project) => {
+  selectedProject.value = project
+}
 </script>
 
 <template>
-  <div class="relative w-full max-w-[1920px] mx-auto flex items-center mt-16">
-    <div class="w-full md:w-[40%] flex flex-col gap-8 md:gap-16 px-4 md:pl-[6%] lg:pl-[8%]">
+  <div class="w-full flex flex-col items-center justify-center">
+    <!-- Colonne du haut -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 w-[80%]">
       <ProjectCard
-        v-for="(project, index) in leftProjects"
+        v-for="(project, index) in projects.slice(0, 3)"
         :key="project.id"
         :project="project"
         :isDarkMode="isDarkMode"
+        class="w-full transform transition-all duration-500"
         :class="[
-          'transform transition-all duration-500',
-          { 'translate-x-[-100px] opacity-0': !isVisible },
-          { 'translate-x-0 opacity-100': isVisible },
-          { 'transition-delay-100': index === 0 },
-          { 'transition-delay-200': index === 1 },
-          { 'transition-delay-300': index === 2 }
+          { 'opacity-0': !isVisible },
+          { 'opacity-100': isVisible },
+          `transition-delay-${(index + 1) * 100}`
         ]"
-        @openModal="selectedProject = $event"
+        @openModal="openModal(project)"
       />
     </div>
-    <div class="w-[40%] flex items-center justify-center">
+
+    <!-- Slot central -->
+    <div class="w-[40%] flex items-center justify-center my-4">
       <slot></slot>
     </div>
-    <div class="w-full md:w-[40%] flex flex-col gap-8 md:gap-16 px-4 md:pr-[6%] lg:pr-[8%]">
+
+    <!-- Colonne du bas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 w-[80%]">
       <ProjectCard
-        v-for="(project, index) in rightProjects"
+        v-for="(project, index) in projects.slice(3, 6)"
         :key="project.id"
         :project="project"
         :isDarkMode="isDarkMode"
+        class="w-full transform transition-all duration-500"
         :class="[
-          'transform transition-all duration-500',
-          { 'translate-x-[100px] opacity-0': !isVisible },
-          { 'translate-x-0 opacity-100': isVisible },
-          { 'transition-delay-100': index === 0 },
-          { 'transition-delay-200': index === 1 },
-          { 'transition-delay-300': index === 2 }
+          { 'opacity-0': !isVisible },
+          { 'opacity-100': isVisible },
+          `transition-delay-${(index + 1) * 100}`
         ]"
-        @openModal="selectedProject = $event"
+        @openModal="openModal(project)"
       />
     </div>
+
 
     <!-- Modal -->
     <Transition name="modal">

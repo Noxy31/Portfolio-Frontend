@@ -7,8 +7,9 @@ import HomeBlob from '@/components/blobs/HomeBlob.vue'
 import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue'
 import ContactBlob from './blobs/ContactBlob.vue'
 import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue'
-import ProjectCards from '../components/ProjectCards.vue';
+import ProjectCards from '../components/ProjectCards.vue'; // Importer ProjectCards
 import ContactTitle from '../components/Titles/ContactTitle.vue';
+import AnimatedBackground from '../components/AnimatedBackground.vue'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
@@ -18,6 +19,7 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 const mouseX = ref(0)
 const mouseY = ref(0)
 const isGlowVisible = ref(false)
+const isModalOpen = ref(false);  // Ajout de isModalOpen
 
 const updateMousePosition = (event: MouseEvent) => {
   if (event.target && isElementOrAncestor(event.target as HTMLElement, 'main')) {
@@ -108,6 +110,16 @@ onMounted(() => {
   window.addEventListener('mousemove', updateMousePosition)
 })
 
+watch(isModalOpen, (newValue) => {
+  if (newValue) {
+    document.body.style.overflow = 'hidden';  // Désactive le scroll
+    document.body.classList.add('modal-open');
+  } else {
+    document.body.style.overflow = '';  // Réactive le scroll
+    document.body.classList.remove('modal-open');
+  }
+});
+
 onBeforeUnmount(() => {
   if (observer) {
     sections.value.forEach(section => {
@@ -121,6 +133,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="relative min-h-screen overflow-hidden">
+
     <div class="pointer-events-none fixed inset-0 z-30" :style="{ opacity: isGlowVisible ? 1 : 0 }">
       <div class="absolute" :style="{
         left: `${mouseX}px`,
@@ -183,41 +196,74 @@ onBeforeUnmount(() => {
         </li>
       </ul>
     </nav>
+    <AnimatedBackground
+      :opacity="1 - sectionVisibility['projects']"
+      :isDarkMode="isDarkMode"
+    />
 
-    <main class="relative overflow-x-hidden h-screen overflow-y-auto snap-y snap-mandatory">
-      <section id="home" class="min-h-screen relative flex items-center justify-center snap-start snap-always">
-        <div class="absolute inset-0 flex items-center justify-center">
+    <main class="relative overflow-y-auto">
+      <!-- Section Home -->
+      <section id="home" class="h-screen flex items-center justify-center min-h-screen relative">
+        <div class="absolute inset-0 flex items-center justify-center z-10">
           <HomeBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['home'] || 0" />
         </div>
         <AnimatedTitle :isDarkMode="isDarkMode" />
         <ScrollIndicator :isDarkMode="isDarkMode" />
       </section>
 
-      <section id="projects" class="min-h-screen relative snap-start snap-always">
-        <div class="absolute inset-0 flex items-center justify-center">
-          <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])" />
-        </div>
-        <div class="relative z-10 w-full flex flex-col">
-          <h2
-            class="text-8xl sm:text-8xl md:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
-            :class="{ 'text-[#AEB7BC]': isDarkMode, 'text-[#213447]': !isDarkMode }">
-            Projets
-          </h2>
-          <div class="flex-1 flex items-center">
-            <ProjectCards :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])">
-            </ProjectCards>
-          </div>
-        </div>
-      </section>
+      <!-- Section Projects -->
+      <section id="projects" class="relative min-h-screen pb-16 lg:pb-32 z-0">
+  <div class="absolute inset-0 flex items-center justify-center z-10">
+    <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])" />
+  </div>
+  <div class="relative z-20 w-full flex flex-col">
+    <h2
+      class="text-8xl sm:text-8xl md:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+      :class="{ 'text-[#AEB7BC]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+      Projets
+    </h2>
+    <div class="flex-1 flex items-center mt-12"> <!-- Ajout de mt-12 pour un espacement -->
+      <ProjectCards :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])" />
+    </div>
+  </div>
+</section>
 
-      <section id="contact" class="min-h-screen relative snap-start snap-always">
-        <div class="absolute inset-0 flex items-center justify-center">
+      <!-- Section Contact -->
+      <section id="contact" class="h-screen relative min-h-screen z-0">
+        <div class="absolute inset-0 flex items-center justify-center z-10">
           <ContactBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['contact'] || 0" />
         </div>
-        <div class="relative z-10 w-full h-full">
+        <div class="relative z-20 w-full h-full">
           <ContactTitle :isDarkMode="isDarkMode" />
         </div>
       </section>
     </main>
   </div>
 </template>
+
+
+<style scoped>
+/* Appliquer un minimum de hauteur de 100vh pour chaque section */
+section {
+  min-height: 100vh;
+}
+
+main {
+  overflow-y: auto;
+}
+
+
+.scroll-indicator-container {
+  position: absolute;
+  bottom: 0;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open .navbar,
+body.modal-open .toggle-color-mode {
+  display: none;
+}
+</style>

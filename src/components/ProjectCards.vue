@@ -13,6 +13,8 @@ interface Project {
   docUrl: string
 }
 
+const emit = defineEmits(['updateModalState'])
+
 defineProps({
   isDarkMode: {
     type: Boolean as PropType<boolean>,
@@ -73,19 +75,11 @@ const openPdf = (url: string) => {
 // Watcher pour gérer le défilement et la navbar/toggle
 watch(selectedProject, (newVal) => {
   if (newVal) {
-    document.body.style.overflow = 'hidden' // Empêche le scroll
-    // Cacher la navbar et toggle ici (ajuste ces éléments selon ton code)
-    const navbar = document.getElementById('navbar')
-    if (navbar) navbar.style.display = 'none'
-    const toggle = document.getElementById('color-mode-toggle')
-    if (toggle) toggle.style.display = 'none'
+    document.body.style.overflow = 'hidden'
+    emit('updateModalState', true)
   } else {
-    document.body.style.overflow = '' // Réactive le scroll
-    // Afficher la navbar et toggle
-    const navbar = document.getElementById('navbar')
-    if (navbar) navbar.style.display = ''
-    const toggle = document.getElementById('color-mode-toggle')
-    if (toggle) toggle.style.display = ''
+    document.body.style.overflow = ''
+    emit('updateModalState', false)
   }
 })
 

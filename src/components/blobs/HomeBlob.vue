@@ -11,8 +11,13 @@ const props = defineProps<{
 // Performance settings
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 const performanceSettings = {
-  subdivision: isMobile ? 20 : 32,
-  targetFPS: isMobile ? 30 : 60
+  subdivision: isMobile ? 28 : 32,
+  targetFPS: isMobile ? 45 : 60,
+  particleSize: isMobile ? 0.85 : 1.0,
+  quality: {
+    pixelRatio: isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2),
+    antialias: true
+  }
 }
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
@@ -109,15 +114,25 @@ const init = () => {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
   camera.position.z = 5
 
-  renderer = new THREE.WebGLRenderer({
+  const rendererParams: THREE.WebGLRendererParameters = {
     canvas: canvasRef.value,
     alpha: true,
-    antialias: !isMobile,
+    antialias: performanceSettings.quality.antialias,
     powerPreference: "high-performance",
-    preserveDrawingBuffer: true
-  })
+    preserveDrawingBuffer: true,
+    stencil: false,
+    depth: true
+  }
+
+  renderer = new THREE.WebGLRenderer(rendererParams)
+
   renderer.setSize(window.innerWidth, window.innerHeight)
-  renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2))
+  renderer.setPixelRatio(performanceSettings.quality.pixelRatio)
+  renderer.setClearColor(0x000000, 0)
+  renderer.sortObjects = false
+
+  renderer.info.autoReset = false
+  renderer.shadowMap.autoUpdate = false
 
   createBlob()
 }

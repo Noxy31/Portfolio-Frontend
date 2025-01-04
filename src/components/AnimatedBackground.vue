@@ -314,9 +314,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="ctnRef" class="absolute inset-0 -z-10">
-    <div v-if="!isWebGLSupported || !isEnabled" class="absolute inset-0 bg-gradient-to-br"
-      :class="isDarkMode ? 'from-[#213447] to-[#212A31]' : 'from-[#6EA8CC] to-[#EEE9E5]'">
+  <div ref="ctnRef" class="fixed inset-0 w-screen h-screen -z-10">
+    <div v-if="!isWebGLSupported || !isEnabled"
+         class="fixed inset-0 w-screen h-screen bg-gradient-to-br"
+         :class="isDarkMode ? 'from-[#213447] to-[#212A31]' : 'from-[#6EA8CC] to-[#EEE9E5]'">
     </div>
   </div>
 </template>

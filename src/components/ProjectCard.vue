@@ -29,15 +29,22 @@ defineEmits<{
 </script>
 
 <template>
-  <GradientCard :title="project.title" :description="project.description" :withArrow="true"
-    @click="$emit('openModal', project)">
-    <div class="h-48 md:h-56 lg:h-64 w-full overflow-hidden bg-white dark:bg-black flex items-center justify-center">
- <img
-   :src="project.imageout"
-   :alt="project.title"
-   class="min-w-full min-h-full object-cover"
-   style="transform: scale(1.2);"
- >
-</div>
+  <GradientCard
+    :title="project.title"
+    :description="project.description"
+    :withArrow="true"
+    :isDarkMode="isDarkMode"
+    @click="$emit('openModal', project)"
+  >
+    <div
+      class="h-48 md:h-56 lg:h-64 w-full overflow-hidden flex items-center justify-center"
+    >
+      <img
+        :src="project.imageout"
+        :alt="project.title"
+        class="min-w-full min-h-full object-cover"
+        style="transform: scale(1.2);"
+      >
+    </div>
   </GradientCard>
 </template>

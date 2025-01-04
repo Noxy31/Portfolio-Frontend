@@ -1,4 +1,4 @@
-<!-- AnimatedBackground.vue -->
+# AnimatedBackground.vue
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl'
@@ -10,27 +10,45 @@ const props = defineProps<{
 
 const ctnRef = ref<HTMLDivElement>()
 const isEnabled = ref(true)
+const isWebGLSupported = ref(true)
 
+// Amélioration de la détection des performances
 const detectPerformance = () => {
   const cpuCores = navigator.hardwareConcurrency || 2
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  return cpuCores <= 4 || isMobile
+  const screenWidth = window.innerWidth
+
+  if (isMobile && screenWidth < 768) {
+    return 'low'
+  } else if (cpuCores <= 4 || isMobile) {
+    return 'medium'
+  }
+  return 'high'
 }
 
 const quality = {
   high: {
-    dpr: 2,
+    dpr: 1.5,  // Réduit pour de meilleures performances
     iterations: 8.0,
-    animationSpeed: 1.2
+    animationSpeed: 1.2,
+    scale: 1
+  },
+  medium: {
+    dpr: 1,
+    iterations: 6.0,
+    animationSpeed: 1.0,
+    scale: 1  // Maintient l'échelle à 1 pour éviter les problèmes de dimensionnement
   },
   low: {
-    dpr: 1,
+    dpr: 0.75,
     iterations: 4.0,
-    animationSpeed: 0.8
+    animationSpeed: 0.8,
+    scale: 1  // Maintient l'échelle à 1 pour éviter les problèmes de dimensionnement
   }
 }
 
-const settings = detectPerformance() ? quality.low : quality.high
+const performanceLevel = detectPerformance()
+const settings = quality[performanceLevel]
 
 const vert = `
   attribute vec2 uv;
@@ -52,6 +70,14 @@ const frag = `
   void main() {
     float mr = min(uResolution.x, uResolution.y);
     vec2 uv = (vUv.xy * 2.0 - 1.0) * uResolution.xy / mr;
+
+    // Ajustement du zoom pour mobile
+    #ifdef GL_FRAGMENT_PRECISION_HIGH
+      uv *= 1.5;
+    #else
+      uv *= 1.2;
+    #endif
+
     float d = -uTime * uAnimationSpeed;
     float a = 0.0;
     for (float i = 0.0; i < 16.0; ++i) {
@@ -68,76 +94,182 @@ const frag = `
     gl_FragColor = vec4(col, 1.0);
   }`
 
-let renderer: Renderer
-let animateId: number
-let gl: WebGLRenderingContext & { renderer: Renderer; canvas: HTMLCanvasElement }
+let renderer: Renderer | null = null
+let animateId: number | null = null
+let gl: WebGLRenderingContext & { renderer: Renderer; canvas: HTMLCanvasElement } | null = null
+let program: Program | null = null
 let lastFrame = 0
-const targetFPS = detectPerformance() ? 30 : 60
+const targetFPS = performanceLevel === 'low' ? 30 : 60
 const frameInterval = 1000 / targetFPS
 
+const checkWebGLSupport = () => {
+  const canvas = document.createElement('canvas')
+  const gl = canvas.getContext('webgl')
+  return !!gl
+}
+
 const resize = () => {
-  if (!ctnRef.value || !renderer) return
-  const scale = detectPerformance() ? 0.75 : 1
-  renderer.setSize(ctnRef.value.offsetWidth * scale, ctnRef.value.offsetHeight * scale)
+  if (!ctnRef.value || !renderer || !gl) return
+
+  try {
+    // On récupère les dimensions actuelles du conteneur
+    const width = ctnRef.value.offsetWidth
+    const height = ctnRef.value.offsetHeight
+
+    // On vérifie que les dimensions sont valides
+    if (width === 0 || height === 0) return
+
+    // Redimensionnement du renderer
+    renderer.setSize(width, height)
+
+    // Mise à jour du viewport avec les bonnes dimensions
+    const internalWidth = Math.floor(width * settings.scale)
+    const internalHeight = Math.floor(height * settings.scale)
+
+    // S'assurer que le viewport a des dimensions valides
+    if (internalWidth > 0 && internalHeight > 0) {
+      gl.viewport(0, 0, internalWidth, internalHeight)
+    }
+
+    // Mise à jour des uniformes du programme
+    if (program) {
+      program.uniforms.uResolution.value = [
+        internalWidth,
+        internalHeight,
+        internalWidth / internalHeight
+      ]
+    }
+
+    // Force un rendu immédiat pour éviter le flash noir
+    if (renderer && program && gl) {
+      const geometry = new Triangle(gl)
+      const mesh = new Mesh(gl, { geometry, program })
+      renderer.render({ scene: mesh })
+    }
+  } catch (error) {
+    console.error('Error during resize:', error)
+    // En cas d'erreur, on réinitialise le contexte WebGL
+    cleanupWebGL()
+    initWebGL()
+  }
+}
+
+const initWebGL = () => {
+  if (!ctnRef.value) return
+
+  try {
+    renderer = new Renderer({ dpr: settings.dpr })
+    gl = renderer.gl
+
+    const geometry = new Triangle(gl)
+    program = new Program(gl, {
+      vertex: vert,
+      fragment: frag,
+      uniforms: {
+        uTime: { value: 0 },
+        uIterations: { value: settings.iterations },
+        uAnimationSpeed: { value: settings.animationSpeed },
+        uColor: { value: new Color(props.isDarkMode ? 0.2 : 0.8, 0.2, 0.5) },
+        uResolution: {
+          value: [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height],
+        },
+      },
+    })
+
+    const mesh = new Mesh(gl, { geometry, program })
+
+    if (gl.canvas instanceof HTMLCanvasElement) {
+      ctnRef.value.appendChild(gl.canvas)
+      gl.canvas.style.opacity = props.opacity.toString()
+      gl.canvas.style.transition = 'opacity 0.5s ease-in-out'
+      gl.canvas.style.width = '100%'
+      gl.canvas.style.height = '100%'
+      gl.canvas.style.position = 'absolute'
+      gl.canvas.style.left = '0'
+      gl.canvas.style.top = '0'
+      gl.canvas.style.objectFit = 'cover'
+    }
+
+    // Forcer un premier rendu
+    renderer.render({ scene: mesh })
+  } catch (error) {
+    console.error('Error initializing WebGL:', error)
+    isWebGLSupported.value = false
+    cleanupWebGL()
+  }
+}
+
+let resizeTimeout: number | null = null
+const handleResize = () => {
+  if (resizeTimeout) {
+    window.clearTimeout(resizeTimeout)
+  }
+  resizeTimeout = window.setTimeout(() => {
+    resize()
+  }, 150)
+}
+
+const cleanupWebGL = () => {
+  if (animateId !== null) {
+    cancelAnimationFrame(animateId)
+    animateId = null
+  }
+
+  if (gl?.canvas instanceof HTMLCanvasElement && ctnRef.value?.contains(gl.canvas)) {
+    ctnRef.value.removeChild(gl.canvas)
+  }
+
+  if (gl) {
+    gl.getExtension('WEBGL_lose_context')?.loseContext()
+    gl = null
+  }
+
+  if (program) {
+    program.remove()
+    program = null
+  }
+
+  if (renderer) {
+    renderer = null
+  }
 }
 
 onMounted(() => {
   if (!ctnRef.value) return
 
-  // Désactiver l'animation si les performances sont trop faibles
-  if (detectPerformance() && window.innerWidth < 768) {
-    isEnabled.value = false
-    return
-  }
+  isWebGLSupported.value = checkWebGLSupport()
+  if (!isWebGLSupported.value) return
 
-  const ctn = ctnRef.value
-  renderer = new Renderer({ dpr: settings.dpr })
-  gl = renderer.gl
+  initWebGL()
 
-  window.addEventListener('resize', resize)
-  resize()
+  // Ajout de la fonction d'animation
+  if (renderer && program && gl) {
+    const geometry = new Triangle(gl)
+    const mesh = new Mesh(gl, { geometry, program })
 
-  const geometry = new Triangle(gl)
-  const program = new Program(gl, {
-    vertex: vert,
-    fragment: frag,
-    uniforms: {
-      uTime: { value: 0 },
-      uIterations: { value: settings.iterations },
-      uAnimationSpeed: { value: settings.animationSpeed },
-      uColor: { value: new Color(props.isDarkMode ? 0.2 : 0.8, 0.2, 0.5) },
-      uResolution: {
-        value: [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height],
-      },
-    },
-  })
+    const update = (t: number) => {
+      if (!isEnabled.value || !renderer || !program || !mesh) return
 
-  const mesh = new Mesh(gl, { geometry, program })
+      const now = performance.now()
+      const elapsed = now - lastFrame
 
-  const update = (t: number) => {
-    if (!isEnabled.value) return
+      if (elapsed > frameInterval) {
+        lastFrame = now - (elapsed % frameInterval)
+        program.uniforms.uTime.value = t * 0.001
+        program.uniforms.uColor.value = new Color(props.isDarkMode ? 0.2 : 0.8, 0.2, 0.5)
+        renderer.render({ scene: mesh })
+      }
 
-    const now = performance.now()
-    const elapsed = now - lastFrame
-
-    if (elapsed > frameInterval) {
-      lastFrame = now - (elapsed % frameInterval)
-      program.uniforms.uTime.value = t * 0.001
-      program.uniforms.uColor.value = new Color(props.isDarkMode ? 0.2 : 0.8, 0.2, 0.5)
-      renderer.render({ scene: mesh })
+      animateId = requestAnimationFrame(update)
     }
 
     animateId = requestAnimationFrame(update)
   }
 
-  animateId = requestAnimationFrame(update)
-
-  if (gl.canvas instanceof HTMLCanvasElement) {
-    ctn.appendChild(gl.canvas)
-    gl.canvas.style.opacity = props.opacity.toString()
-    gl.canvas.style.transition = 'opacity 0.5s ease-in-out'
-  }
+  // Correction ici : ajout de l'event listener complet
+  window.addEventListener('resize', handleResize)
 })
+
 
 watch(() => props.opacity, (newOpacity) => {
   if (gl?.canvas instanceof HTMLCanvasElement) {
@@ -145,23 +277,43 @@ watch(() => props.opacity, (newOpacity) => {
   }
 })
 
-document.addEventListener('visibilitychange', () => {
-  isEnabled.value = document.visibilityState === 'visible'
+watch(() => props.isDarkMode, (newIsDarkMode) => {
+  if (program) {
+    program.uniforms.uColor.value = new Color(newIsDarkMode ? 0.2 : 0.8, 0.2, 0.5)
+  }
 })
 
-onUnmounted(() => {
-  cancelAnimationFrame(animateId)
-  window.removeEventListener('resize', resize)
-  if (ctnRef.value && gl?.canvas instanceof HTMLCanvasElement) {
-    ctnRef.value.removeChild(gl.canvas)
+const handleVisibilityChange = () => {
+  isEnabled.value = document.visibilityState === 'visible'
+
+  // Redémarrer l'animation si nécessaire
+  if (isEnabled.value && animateId === null) {
+    animateId = requestAnimationFrame((t) => {
+      lastFrame = performance.now()
+      if (program) program.uniforms.uTime.value = t * 0.001
+    })
   }
-  gl?.getExtension('WEBGL_lose_context')?.loseContext()
+}
+
+document.addEventListener('visibilitychange', handleVisibilityChange)
+
+onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  window.removeEventListener('resize', handleResize)
+
+  if (resizeTimeout) {
+    window.clearTimeout(resizeTimeout)
+    resizeTimeout = null
+  }
+
+  cleanupWebGL()
 })
 </script>
 
 <template>
   <div ref="ctnRef" class="absolute inset-0 -z-10">
-    <div v-if="!isEnabled" class="absolute inset-0 bg-gradient-to-br"
+    <div v-if="!isWebGLSupported || !isEnabled"
+         class="absolute inset-0 bg-gradient-to-br"
          :class="isDarkMode ? 'from-[#213447] to-[#212A31]' : 'from-[#6EA8CC] to-[#EEE9E5]'">
     </div>
   </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="absolute bottom-4 inset-x-0 md:inset-x-auto md:right-44 md:bottom-8 flex flex-col items-center gap-2 md:gap-4 animate-bounce">
+  <div class="absolute bottom-12 md:bottom-16 inset-x-0 md:inset-x-auto md:right-44 flex flex-col items-center gap-2 md:gap-4 animate-bounce">
     <p
       :style="{ color: isDarkMode ? '#EEE9E5' : '#213447' }"
       class="text-sm md:text-lg lg:text-xl font-medium"

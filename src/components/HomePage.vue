@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue'
-import { Home, FolderOpen, Mail, LucideMoon, LucideSun } from 'lucide-vue-next'
-import type { LucideIcon } from 'lucide-vue-next'
+import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
+import { Home, FolderOpen, Mail, LucideMoon, LucideSun, UserCircle } from 'lucide-vue-next';
+import type { LucideIcon } from 'lucide-vue-next';
 import ScrollIndicator from '@/components/ScrollIndicator.vue';
-import HomeBlob from '@/components/blobs/HomeBlob.vue'
-import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue'
-import ContactBlob from './blobs/ContactBlob.vue'
-import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue'
+import HomeBlob from '@/components/blobs/HomeBlob.vue';
+import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue';
+import ContactBlob from './blobs/ContactBlob.vue';
+import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue';
 import ProjectCards from '../components/ProjectCards.vue';
 import ContactTitle from '../components/Titles/ContactTitle.vue';
 import DynamicCard from '../components/DynamicCard.vue';
-import AnimatedBackground from '../components/AnimatedBackground.vue'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import AnimatedBackground from '../components/AnimatedBackground.vue';
+import AboutCard from '@/components/AboutCard.vue';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
@@ -63,11 +64,12 @@ const activeColors = {
 
 const navItems: NavItem[] = [
   { icon: Home, label: 'Home', id: 'home' },
+  { icon: UserCircle, label: 'About', id: 'about' },
   { icon: FolderOpen, label: 'Projects', id: 'projects' },
   { icon: Mail, label: 'Contact', id: 'contact' }
 ]
 
-const isDarkMode = ref(true)
+const isDarkMode = ref(false)
 const currentSection = ref('home')
 const sections = ref<HTMLElement[]>([])
 let observer: IntersectionObserver
@@ -75,7 +77,6 @@ const sectionVisibility = ref<{ [key: string]: number }>({})
 
 const hasScrolled = ref(false)
 
-// Ajoutez un gestionnaire de scroll
 const handleScroll = () => {
   if (!hasScrolled.value && window.scrollY > 0) {
     hasScrolled.value = true
@@ -100,21 +101,15 @@ watch(isDarkMode, (newValue) => {
 const setupScrollObserver = () => {
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      // Gardons un suivi plus précis de la visibilité pour l'animation de fond
       sectionVisibility.value[entry.target.id] = entry.intersectionRatio
 
-      // Pour le switch, utilisons un seuil plus strict
-      if (entry.target.id === 'home') {
-        if (entry.intersectionRatio < 0.95) {
-          currentSection.value = 'projects'
-        } else {
-          currentSection.value = 'home'
-        }
+      if (entry.intersectionRatio > 0.5) {
+        currentSection.value = entry.target.id
       }
     })
   }, {
-    // Utilisons plus de seuils pour une animation plus fluide
-    threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 1]
+    threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+    rootMargin: '-50px 0px'
   })
 
   sections.value.forEach(section => {
@@ -136,10 +131,8 @@ const scrollToSection = (id: string) => {
 const backgroundOpacity = computed(() => {
   if (!sectionVisibility.value['projects']) return 1
   if (!sectionVisibility.value['contact']) {
-    // Transition entre Home et Projects
     return 1 - sectionVisibility.value['projects']
   } else {
-    // Transition entre Projects et Contact
     return sectionVisibility.value['contact']
   }
 })
@@ -158,10 +151,10 @@ onMounted(() => {
 
 watch(isModalOpen, (newValue) => {
   if (newValue) {
-    document.body.style.overflow = 'hidden';  // Désactive le scroll
+    document.body.style.overflow = 'hidden';
     document.body.classList.add('modal-open');
   } else {
-    document.body.style.overflow = '';  // Réactive le scroll
+    document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
   }
 });
@@ -208,20 +201,20 @@ onBeforeUnmount(() => {
       isDarkMode ? 'opacity-100' : 'opacity-0'
     ]" />
 
-<div :class="[
-  'fixed w-full top-0 flex justify-end p-4 z-50 transition-all duration-300 ease-in-out',
-  isModalOpen
-    ? 'opacity-0 pointer-events-none'
-    : [
-        isMobile
-          ? hasScrolled && currentSection !== 'home'
-            ? 'opacity-0 -translate-y-full'
-            : 'opacity-100 translate-y-0'
-          : currentSection === 'home'
-            ? 'opacity-100 translate-y-0'
-            : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'
-      ]
-]">
+    <div :class="[
+      'fixed w-full top-0 flex justify-end p-4 z-50 transition-all duration-300 ease-in-out',
+      isModalOpen
+        ? 'opacity-0 pointer-events-none'
+        : [
+          isMobile
+            ? hasScrolled && currentSection !== 'home'
+              ? 'opacity-0 -translate-y-full'
+              : 'opacity-100 translate-y-0'
+            : currentSection === 'home'
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'
+        ]
+    ]">
 
 
 
@@ -270,6 +263,38 @@ onBeforeUnmount(() => {
         <ScrollIndicator :isDarkMode="isDarkMode" />
       </section>
 
+      <!-- Section About -->
+      <section id="about" class="min-h-[calc(var(--vh)*100)] relative z-0 pb-32">
+
+        <div class="relative z-20 w-full flex flex-col">
+          <h2
+            class="text-8xl sm:text-8xl md:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+            :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+            À propos
+          </h2>
+
+          <div class="container mx-auto max-w-[1920px] mt-24 md:mt-32 px-4 lg:px-16 xl:px-24">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 lg:gap-32 items-center">
+              <div class="flex justify-center md:justify-end">
+                <div
+                  class="w-72 h-72 md:w-[400px] md:h-[400px] lg:w-[550px] lg:h-[550px] xl:w-[600px] xl:h-[600px] rounded-full overflow-hidden border-4 transition-all duration-500"
+                  :class="[
+                    isDarkMode ? 'border-[#6EA8CC]' : 'border-[#3C5B80]',
+                    sectionVisibility['about'] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                  ]">
+                  <img src="/3.jpg" alt="Avatar" class="w-full h-full object-cover" />
+                </div>
+              </div>
+
+              <div class="flex justify-center md:justify-start">
+                <AboutCard :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['about'])"
+                  class="w-full max-w-2xl" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Section Projects -->
       <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-0">
         <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
@@ -278,7 +303,7 @@ onBeforeUnmount(() => {
         <div class="relative z-20 w-full flex flex-col">
           <h2
             class="text-8xl sm:text-8xl md:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
-            :class="{ 'text-[#AEB7BC]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+            :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
             Projets
           </h2>
           <div class="flex-1 flex items-center mt-12">

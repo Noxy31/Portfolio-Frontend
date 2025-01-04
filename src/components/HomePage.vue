@@ -207,9 +207,9 @@ onBeforeUnmount(() => {
         ? 'opacity-0 pointer-events-none'
         : [
           isMobile
-            ? hasScrolled && currentSection !== 'home'
-              ? 'opacity-0 -translate-y-full'
-              : 'opacity-100 translate-y-0'
+            ? sectionVisibility['home'] >= 0.8
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 -translate-y-full'
             : currentSection === 'home'
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'

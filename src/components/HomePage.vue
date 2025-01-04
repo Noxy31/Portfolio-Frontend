@@ -131,6 +131,8 @@ const scrollToSection = (id: string) => {
 }
 
 const backgroundOpacity = computed(() => {
+  if (isMobile.value) return 1;
+
   if (!sectionVisibility.value['projects']) return 1
   if (!sectionVisibility.value['contact']) {
     return 1 - sectionVisibility.value['projects']

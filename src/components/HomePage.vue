@@ -23,7 +23,6 @@ const mouseY = ref(0)
 const isGlowVisible = ref(false)
 const isModalOpen = ref(false);
 const isMobile = ref(false)
-const initialLoad = ref(true)
 
 const checkMobile = () => {
   isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.matchMedia("(max-width: 768px)").matches
@@ -79,10 +78,13 @@ const sectionVisibility = ref<{ [key: string]: number }>({})
 const hasScrolled = ref(false)
 
 const handleScroll = () => {
-  if (!hasScrolled.value && window.scrollY > 0) {
-    hasScrolled.value = true
-  } else if (hasScrolled.value && window.scrollY === 0) {
-    hasScrolled.value = false
+  const scrollPosition = window.scrollY;
+  const viewportHeight = window.innerHeight;
+
+  if (scrollPosition > viewportHeight * 0.1) {
+    hasScrolled.value = true;
+  } else {
+    hasScrolled.value = false;
   }
 }
 
@@ -143,11 +145,6 @@ onMounted(() => {
   sections.value = Array.from(document.querySelectorAll('section'))
   setupScrollObserver()
   sectionVisibility.value['home'] = 1
-
-  initialLoad.value = true
-  setTimeout(() => {
-    initialLoad.value = false
-  }, 1000)
 
   window.addEventListener('mousemove', updateMousePosition)
   window.addEventListener('resize', checkMobile)
@@ -213,9 +210,9 @@ onBeforeUnmount(() => {
         ? 'opacity-0 pointer-events-none'
         : [
           isMobile
-            ? initialLoad || sectionVisibility['home'] >= 0.8
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 -translate-y-full'
+            ? hasScrolled && currentSection !== 'home'
+              ? 'opacity-0 -translate-y-full'
+              : 'opacity-100 translate-y-0'
             : currentSection === 'home'
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'

@@ -8,6 +8,11 @@ const props = defineProps<{
   isDarkMode: boolean
 }>()
 
+const getWindowHeight = () => {
+  return isMobile ? window.outerHeight : window.innerHeight
+}
+
+
 // Performance settings
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 const performanceSettings = {
@@ -111,7 +116,12 @@ const init = () => {
   if (!canvasRef.value) return
 
   scene = new THREE.Scene()
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
+  camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / getWindowHeight(),
+    0.1,
+    100
+  )
   camera.position.z = 5
 
   const rendererParams: THREE.WebGLRendererParameters = {
@@ -126,7 +136,7 @@ const init = () => {
 
   renderer = new THREE.WebGLRenderer(rendererParams)
 
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.setSize(window.innerWidth, getWindowHeight())
   renderer.setPixelRatio(performanceSettings.quality.pixelRatio)
   renderer.setClearColor(0x000000, 0)
   renderer.sortObjects = false
@@ -244,9 +254,10 @@ const handleMouseMove = (event: MouseEvent) => {
 
 const handleResize = () => {
   if (!camera || !renderer) return
-  camera.aspect = window.innerWidth / window.innerHeight
+
+  camera.aspect = window.innerWidth / getWindowHeight()
   camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
+  renderer.setSize(window.innerWidth, getWindowHeight())
   renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2))
 }
 

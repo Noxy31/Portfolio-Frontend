@@ -28,7 +28,7 @@ const detectPerformance = () => {
 
 const quality = {
   high: {
-    dpr: 1.5,  // Réduit pour de meilleures performances
+    dpr: 1.5,
     iterations: 8.0,
     animationSpeed: 1.2,
     scale: 1
@@ -37,13 +37,13 @@ const quality = {
     dpr: 1,
     iterations: 6.0,
     animationSpeed: 1.0,
-    scale: 1  // Maintient l'échelle à 1 pour éviter les problèmes de dimensionnement
+    scale: 1
   },
   low: {
     dpr: 0.75,
     iterations: 4.0,
-    animationSpeed: 0.8,
-    scale: 1  // Maintient l'échelle à 1 pour éviter les problèmes de dimensionnement
+    animationSpeed: 0.5,
+    scale: 1
   }
 }
 
@@ -108,25 +108,28 @@ const checkWebGLSupport = () => {
   return !!gl
 }
 
+const getViewportHeight = () => {
+  return performanceLevel === 'low'
+    ? window.outerHeight  // Pour mobile
+    : window.innerHeight  // Pour desktop
+}
+
+
 const resize = () => {
   if (!ctnRef.value || !renderer || !gl) return
 
   try {
-    // On récupère les dimensions actuelles du conteneur
+    // Utiliser notre nouvelle fonction pour la hauteur
     const width = ctnRef.value.offsetWidth
-    const height = ctnRef.value.offsetHeight
+    const height = getViewportHeight()
 
-    // On vérifie que les dimensions sont valides
     if (width === 0 || height === 0) return
 
-    // Redimensionnement du renderer
     renderer.setSize(width, height)
 
-    // Mise à jour du viewport avec les bonnes dimensions
     const internalWidth = Math.floor(width * settings.scale)
     const internalHeight = Math.floor(height * settings.scale)
 
-    // S'assurer que le viewport a des dimensions valides
     if (internalWidth > 0 && internalHeight > 0) {
       gl.viewport(0, 0, internalWidth, internalHeight)
     }

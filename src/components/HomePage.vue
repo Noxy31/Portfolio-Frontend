@@ -73,6 +73,17 @@ const sections = ref<HTMLElement[]>([])
 let observer: IntersectionObserver
 const sectionVisibility = ref<{ [key: string]: number }>({})
 
+const hasScrolled = ref(false)
+
+// Ajoutez un gestionnaire de scroll
+const handleScroll = () => {
+  if (!hasScrolled.value && window.scrollY > 0) {
+    hasScrolled.value = true
+  } else if (hasScrolled.value && window.scrollY === 0) {
+    hasScrolled.value = false
+  }
+}
+
 watch(isDarkMode, (newValue) => {
   const root = document.documentElement
   if (newValue) {
@@ -141,6 +152,7 @@ onMounted(() => {
 
   window.addEventListener('mousemove', updateMousePosition)
   window.addEventListener('resize', checkMobile)
+  window.addEventListener('scroll', handleScroll)
 })
 
 
@@ -163,7 +175,9 @@ onBeforeUnmount(() => {
   }
   window.removeEventListener('mousemove', updateMousePosition)
   window.removeEventListener('resize', checkMobile)
+  window.removeEventListener('scroll', handleScroll)
 })
+
 
 </script>
 
@@ -199,10 +213,12 @@ onBeforeUnmount(() => {
   isModalOpen
     ? 'opacity-0 pointer-events-none'
     : [
-        currentSection === 'home'
-          ? 'opacity-100 translate-y-0'
-          : isMobile
+        isMobile
+          ? hasScrolled && currentSection !== 'home'
             ? 'opacity-0 -translate-y-full'
+            : 'opacity-100 translate-y-0'
+          : currentSection === 'home'
+            ? 'opacity-100 translate-y-0'
             : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'
       ]
 ]">

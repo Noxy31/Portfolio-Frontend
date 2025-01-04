@@ -59,7 +59,7 @@ const vert = `
     gl_Position = vec4(position, 0, 1);
   }`
 
-const frag = `
+  const frag = `
   precision highp float;
   uniform float uTime;
   uniform float uIterations;
@@ -312,9 +312,8 @@ onUnmounted(() => {
 
 <template>
   <div ref="ctnRef" class="absolute inset-0 -z-10">
-    <div v-if="!isWebGLSupported || !isEnabled"
-         class="absolute inset-0 bg-gradient-to-br"
-         :class="isDarkMode ? 'from-[#213447] to-[#212A31]' : 'from-[#6EA8CC] to-[#EEE9E5]'">
+    <div v-if="!isWebGLSupported || !isEnabled" class="absolute inset-0 bg-gradient-to-br"
+      :class="isDarkMode ? 'from-[#213447] to-[#212A31]' : 'from-[#6EA8CC] to-[#EEE9E5]'">
     </div>
   </div>
 </template>

@@ -79,9 +79,8 @@ const hasScrolled = ref(false)
 
 const handleScroll = () => {
   const scrollPosition = window.scrollY;
-  const viewportHeight = window.innerHeight;
 
-  if (scrollPosition > viewportHeight * 0.1) {
+  if (scrollPosition > 50) {
     hasScrolled.value = true;
   } else {
     hasScrolled.value = false;
@@ -210,7 +209,7 @@ onBeforeUnmount(() => {
         ? 'opacity-0 pointer-events-none'
         : [
           isMobile
-            ? hasScrolled && currentSection !== 'home'
+            ? hasScrolled
               ? 'opacity-0 -translate-y-full'
               : 'opacity-100 translate-y-0'
             : currentSection === 'home'

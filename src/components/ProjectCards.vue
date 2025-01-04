@@ -59,10 +59,28 @@ const projects = ref<Project[]>([
     id: 4,
     title: 'Ticky',
     description: 'MobileApp - Ticky est une application mobile de ticketing.',
-    imageout: '/path/to/image3.jpg',
+    imageout: '/TickyLogo.png',
     imagein: '/path/to/image3.jpg',
     schemaUrl: '/path/to/schema3.pdf',
     docUrl: '/path/to/doc3.pdf'
+  },
+  {
+    id: 5,
+    title: 'GLPI',
+    description: "Mise en place d’une solution GLPI sur Linux pour la gestion de parc informatique et le suivi des incidents, incluant la configuration et les tests de création/résolution de tickets avec différents profils d’utilisateurs.",
+    imageout: '/GLPI-Logo2.png',
+    imagein: '/GLPI-OVERVIEW.png',
+    schemaUrl: '/GLPI.pdf',
+    docUrl: '/path/to/doc3.pdf'
+  },
+  {
+    id: 6,
+    title: 'Passerelle Linux et DMZ',
+    description: "Mise en place d'une passerelle Linux et d'une DMZ sous Debian 12, intégrant un routeur avec pare-feu, DNS et NAT, ainsi qu'un serveur web sécurisé pour héberger des intranets accessibles en HTTPS, tout en respectant des règles strictes d'accès réseau.",
+    imageout: '/PLDMZ.png',
+    imagein: '/PLDMZ-OVERVIEW.png',
+    schemaUrl: '/Passerelle Linux et DMZ.pdf',
+    docUrl: '/Passerelle Linux et DMZ.pdf'
   },
 ])
 
@@ -167,7 +185,7 @@ const openModal = (project: Project) => {
                 class="flex-1 px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
                 :class="isDarkMode ? 'bg-[#6EA8CC] text-white' : 'bg-[#3C5B80] text-white'"
               >
-                Voir Documentation d'Architecture Technique
+                Voir Documentation Technique
               </button>
             </div>
           </div>

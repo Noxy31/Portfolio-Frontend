@@ -169,13 +169,6 @@ const openModal = (project: Project) => {
               >
                 Voir Documentation d'Architecture Technique
               </button>
-              <button
-                @click="openPdf(selectedProject.docUrl)"
-                class="flex-1 px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
-                :class="isDarkMode ? 'bg-[#6A4C93] text-white' : 'bg-[#372860] text-white'"
-              >
-                Voir Documentation Fonctionnelle
-              </button>
             </div>
           </div>
 

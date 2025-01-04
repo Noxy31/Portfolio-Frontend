@@ -198,8 +198,9 @@ onBeforeUnmount(() => {
       'fixed w-full top-0 flex justify-end p-4 z-50 transition-all duration-300 ease-in-out',
       {
         'opacity-0 pointer-events-none': isModalOpen,
-        'opacity-100 translate-y-0': !isModalOpen && currentSection === 'home',
-        'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0': !isModalOpen && currentSection !== 'home'
+        'opacity-100 translate-y-0': currentSection === 'home',
+        'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0': currentSection !== 'home' && !isMobile,
+        'opacity-0 -translate-y-full': currentSection !== 'home' && isMobile
       }
     ]">
 

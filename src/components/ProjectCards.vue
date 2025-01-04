@@ -34,7 +34,7 @@ const projects = ref<Project[]>([
     description: "WebApp - Organiz'Heure est une application web de gestion de tâches sous forme de To-Do list.",
     imageout: '/logo/Logo-OrganizHeure.png',
     imagein: '/logo/OHExhibit.png',
-    schemaUrl: '/path/to/schema1.pdf',
+    schemaUrl: '/OH.pdf',
     docUrl: '/path/to/doc1.pdf'
   },
   {

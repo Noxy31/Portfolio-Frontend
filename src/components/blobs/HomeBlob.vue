@@ -17,7 +17,7 @@ const getWindowHeight = () => {
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
 const performanceSettings = {
   subdivision: isMobile ? 28 : 32,
-  targetFPS: isMobile ? 45 : 60,
+  targetFPS: isMobile ? 60 : 120,
   particleSize: isMobile ? 0.85 : 1.0,
   quality: {
     pixelRatio: isMobile ? Math.min(window.devicePixelRatio, 1.5) : Math.min(window.devicePixelRatio, 2),

@@ -269,27 +269,44 @@ onBeforeUnmount(() => {
 
       <!-- Section About -->
       <section id="about" class="min-h-[calc(var(--vh)*100)] relative z-0 pb-32">
-
         <div class="relative z-20 w-full flex flex-col">
-          <h2
-            class="text-8xl sm:text-8xl md:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+          <h2 class="text-6xl
+           laptop-sm:text-[4rem]
+           laptop-md:text-[5rem]
+           xl:text-[10rem]
+           font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
             :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
             À propos
           </h2>
-
-          <div class="container mx-auto max-w-[1920px] mt-24 md:mt-32 px-4 lg:px-16 xl:px-24">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-24 lg:gap-32 items-center">
+          <div class="container mx-auto max-w-[1920px]
+                mt-24
+                md:mt-32
+                laptop-sm:mt-16
+                laptop-md:mt-20
+                lg:mt-32
+                px-4 lg:px-16 xl:px-24">
+            <div class="grid grid-cols-1
+                  md:grid-cols-2
+                  gap-8
+                  md:gap-24
+                  laptop-sm:gap-16
+                  laptop-md:gap-20
+                  lg:gap-32
+                  items-center">
               <div class="flex justify-center md:justify-end">
-                <div
-                  class="w-72 h-72 md:w-[400px] md:h-[400px] lg:w-[550px] lg:h-[550px] xl:w-[600px] xl:h-[600px] rounded-full overflow-hidden border-4 transition-all duration-500"
-                  :class="[
-                    isDarkMode ? 'border-[#6EA8CC]' : 'border-[#3C5B80]',
-                    sectionVisibility['about'] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-                  ]">
+                <div class="w-72 h-72
+                     md:w-[400px] md:h-[400px]
+                     laptop-sm:w-[350px] laptop-sm:h-[350px]
+                     laptop-md:w-[400px] laptop-md:h-[400px]
+                     lg:w-[550px] lg:h-[550px]
+                     xl:w-[600px] xl:h-[600px]
+                     rounded-full overflow-hidden border-4 transition-all duration-500" :class="[
+                      isDarkMode ? 'border-[#6EA8CC]' : 'border-[#3C5B80]',
+                      sectionVisibility['about'] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                    ]">
                   <img src="/3.jpg" alt="Avatar" class="w-full h-full object-cover" />
                 </div>
               </div>
-
               <div class="flex justify-center md:justify-start">
                 <AboutCard :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['about'])"
                   class="w-full max-w-2xl" />
@@ -305,8 +322,11 @@ onBeforeUnmount(() => {
           <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])" />
         </div>
         <div class="relative z-20 w-full flex flex-col">
-          <h2
-            class="text-8xl sm:text-8xl md:text-[6rem] lg:text-[8rem] xl:text-[10rem] font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+          <h2 class="text-6xl
+           laptop-sm:text-[4rem]
+           laptop-md:text-[5rem]
+           xl:text-[10rem]
+           font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
             :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
             Projets
           </h2>

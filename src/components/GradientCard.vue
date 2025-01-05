@@ -21,13 +21,15 @@
         left: `${state.elementX}px`,
         top: `${state.elementY}px`,
         background: isDarkMode
-          ? 'linear-gradient(135deg, #3BC4F2, #7A69F9,#F26378,#F5833F)'
-          : 'linear-gradient(135deg, #6EA8CC, #9D8EC1, #3C5B80)',
+          ? 'linear-gradient(135deg, #00FFFF 0%, #FF00FF 50%, #FF0000 100%)'
+          : 'linear-gradient(135deg, #00C6FF 0%, #0072FF 50%, #FF0099 100%)',
+        opacity: '0.5',
+        filter: 'brightness(1.5) contrast(1.5)'
       }" />
     <div class="absolute inset-px rounded-[19px]" :class="[
       isDarkMode
-        ? 'bg-neutral-900/80'
-        : 'bg-[rgba(255,255,255,0.8)]'
+        ? 'bg-neutral-900/70'
+        : 'bg-[rgba(255,255,255,0.7)]'
     ]" />
     <div v-if="$slots.default"
       :class="[
@@ -62,7 +64,7 @@ const props = defineProps<{
   withArrow?: boolean
   circleSize?: number
   class?: string
-  isDarkMode: boolean  // Ajout de la prop isDarkMode
+  isDarkMode: boolean
 }>()
 
 const { state, elementRef } = useMouse()

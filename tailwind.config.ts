@@ -1,5 +1,5 @@
-// Dans tailwind.config.ts
 import type { Config } from 'tailwindcss'
+
 export default {
   content: [
     "./index.html",
@@ -7,6 +7,10 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'laptop-sm': {'min': '1024px', 'max': '1366px'},
+        'laptop-md': {'min': '1367px', 'max': '1536px'},
+      },
       fontFamily: {
         'primary': ['medium', 'sans-serif'],
         'secondary': ['bold', 'serif'],

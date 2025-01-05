@@ -5,7 +5,6 @@ import type { LucideIcon } from 'lucide-vue-next';
 import ScrollIndicator from '@/components/ScrollIndicator.vue';
 import HomeBlob from '@/components/blobs/HomeBlob.vue';
 import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue';
-import ContactBlob from './blobs/ContactBlob.vue';
 import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue';
 import ProjectCards from '../components/ProjectCards.vue';
 import ContactTitle from '../components/Titles/ContactTitle.vue';
@@ -341,7 +340,7 @@ onBeforeUnmount(() => {
       <section id="contact" class="h-[calc(var(--vh)*100)] relative z-0 px-4 md:px-0">
         <!-- Blob central -->
         <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
-          <ContactBlob :isDarkMode="isDarkMode" :isVisible="sectionVisibility['contact'] || 0" />
+
         </div>
 
         <!-- Titre -->

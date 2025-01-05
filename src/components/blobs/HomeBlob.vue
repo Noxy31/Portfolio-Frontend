@@ -122,7 +122,9 @@ const init = () => {
     0.1,
     100
   )
-  camera.position.z = 5
+
+  const isMediumScreen = window.innerWidth <= 1366
+  camera.position.z = isMediumScreen ? 6 : 5
 
   const rendererParams: THREE.WebGLRendererParameters = {
     canvas: canvasRef.value,

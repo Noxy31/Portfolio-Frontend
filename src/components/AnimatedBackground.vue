@@ -60,6 +60,7 @@ const vert = `
     gl_Position = vec4(position, 0, 1);
   }`
 
+// On modifie juste la gestion du temps dans le fragment shader
 const frag = `
   precision highp float;
   uniform float uTime;
@@ -79,7 +80,7 @@ const frag = `
       uv *= 1.0;
     #endif
 
-    float d = -uTime * uAnimationSpeed;
+    float d = -mod(uTime * uAnimationSpeed, 20.0); // On limite juste l'accumulation du temps
     float a = 0.0;
 
     #ifdef GL_FRAGMENT_PRECISION_HIGH

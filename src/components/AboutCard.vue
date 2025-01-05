@@ -24,7 +24,7 @@
                 laptop-md:space-y-5 laptop-md:text-lg"
          :class="isDarkMode ? 'text-neutral-200' : 'text-neutral-700'">
       <p>
-        Passionné par le développement web et mobile, je crée des applications modernes et performantes
+        Passionné par le développement web et mobile, ainsi que par la Data Science et l'IA, je crée des applications modernes et performantes
         en utilisant les dernières technologies.
       </p>
       <div class="space-y-2">
@@ -49,7 +49,7 @@
           Expérience :
         </h4>
         <p class="mb-2">
-          3 ans d'expérience en développement web, spécialisé dans la création d'applications Vue.js
+           Etudiant en développement web, spécialisé dans la création d'applications Vue.js
           et le développement d'APIs REST.
         </p>
       </div>

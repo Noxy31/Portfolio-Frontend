@@ -178,22 +178,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="relative min-h-[calc(var(--vh)*100)] overflow-hidden">
-
-    <div class="pointer-events-none fixed inset-0 z-30" :style="{ opacity: isGlowVisible ? 1 : 0 }">
-      <div class="absolute" :style="{
-        left: `${mouseX}px`,
-        top: `${mouseY}px`,
-      }">
-        <div class="absolute w-3 h-3 rounded-full animate-orbit transition-colors duration-700 shadow-lg" :class="[
-          isDarkMode
-            ? 'bg-gradient-to-br from-[#6EA8CC] to-[#6A4C93] shadow-[#6EA8CC]/50'
-            : 'bg-gradient-to-br from-[#3C5B80] to-[#372860] shadow-[#3C5B80]/50'
-        ]" :style="{
-          filter: 'drop-shadow(0 0 4px currentColor)'
-        }" />
-      </div>
-    </div>
-
     <div :class="[
       'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#6EA8CC] to-[#EEE9E5]',
       isDarkMode ? 'opacity-0' : 'opacity-100'
@@ -217,8 +201,6 @@ onBeforeUnmount(() => {
               : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'
         ]
     ]">
-
-
 
       <label class="inline-flex items-center relative">
         <input class="peer hidden" id="toggle" type="checkbox" v-model="isDarkMode" />

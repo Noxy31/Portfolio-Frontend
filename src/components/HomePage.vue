@@ -4,7 +4,6 @@ import { Home, FolderOpen, Mail, LucideMoon, LucideSun, UserCircle } from 'lucid
 import type { LucideIcon } from 'lucide-vue-next';
 import ScrollIndicator from '@/components/ScrollIndicator.vue';
 import HomeBlob from '@/components/blobs/HomeBlob.vue';
-import ProjectsBlob from '@/components/blobs/ProjectsBlob.vue';
 import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue';
 import ProjectCards from '../components/ProjectCards.vue';
 import ContactTitle from '../components/Titles/ContactTitle.vue';
@@ -318,7 +317,6 @@ onBeforeUnmount(() => {
       <!-- Section Projects -->
       <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-0">
         <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
-          <ProjectsBlob :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])" />
         </div>
         <div class="relative z-20 w-full flex flex-col">
           <h2 class="text-6xl

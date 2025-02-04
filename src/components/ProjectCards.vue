@@ -18,12 +18,12 @@ const emit = defineEmits(['updateModalState'])
 defineProps({
   isDarkMode: {
     type: Boolean as PropType<boolean>,
-    required: true
+    required: true,
   },
   isVisible: {
     type: Boolean as PropType<boolean>,
-    default: false
-  }
+    default: false,
+  },
 })
 
 const selectedProject = ref<Project | null>(null)
@@ -31,11 +31,12 @@ const projects = ref<Project[]>([
   {
     id: 1,
     title: "Organiz'Heure",
-    description: "WebApp - Organiz'Heure est une application web de gestion de tâches sous forme de To-Do list.",
+    description:
+      "WebApp - Organiz'Heure est une application web de gestion de tâches sous forme de To-Do list.",
     imageout: '/logo/Logo-OrganizHeure.png',
     imagein: '/logo/OHExhibit.png',
     schemaUrl: '/OH.pdf',
-    docUrl: '/path/to/doc1.pdf'
+    docUrl: '/path/to/doc1.pdf',
   },
   {
     id: 2,
@@ -44,16 +45,16 @@ const projects = ref<Project[]>([
     imageout: '/logo/Logo-DE.png',
     imagein: '/logo/DE-Exhibit.png',
     schemaUrl: '/path/to/schema2.pdf',
-    docUrl: '/path/to/doc2.pdf'
+    docUrl: '/path/to/doc2.pdf',
   },
   {
     id: 3,
     title: 'Nurse Care',
-    description: 'Application mobile de soins.',
-    imageout: '/path/to/image3.jpg',
+    description: "Application mobile de gestion de cabinet d'infimiers et d'infirmières",
+    imageout: '/NC-Logo.png',
     imagein: '/path/to/image3.jpg',
     schemaUrl: '/path/to/schema3.pdf',
-    docUrl: '/path/to/doc3.pdf'
+    docUrl: '/path/to/doc3.pdf',
   },
   {
     id: 4,
@@ -62,25 +63,27 @@ const projects = ref<Project[]>([
     imageout: '/TickyLogo.png',
     imagein: '/path/to/image3.jpg',
     schemaUrl: '/path/to/schema3.pdf',
-    docUrl: '/path/to/doc3.pdf'
+    docUrl: '/path/to/doc3.pdf',
   },
   {
     id: 5,
     title: 'GLPI',
-    description: "Mise en place d’une solution GLPI sur Linux pour la gestion de parc informatique et le suivi des incidents, incluant la configuration et les tests de création/résolution de tickets avec différents profils d’utilisateurs.",
+    description:
+      'Mise en place d’une solution GLPI sur Linux pour la gestion de parc informatique et le suivi des incidents, incluant la configuration et les tests de création/résolution de tickets avec différents profils d’utilisateurs.',
     imageout: '/GLPI-Logo2.png',
     imagein: '/GLPI-OVERVIEW.png',
     schemaUrl: '/GLPI.pdf',
-    docUrl: '/path/to/doc3.pdf'
+    docUrl: '/path/to/doc3.pdf',
   },
   {
     id: 6,
     title: 'Passerelle Linux et DMZ',
-    description: "Mise en place d'une passerelle Linux et d'une DMZ sous Debian 12, intégrant un routeur avec pare-feu, DNS et NAT, ainsi qu'un serveur web sécurisé pour héberger des intranets accessibles en HTTPS, tout en respectant des règles strictes d'accès réseau.",
+    description:
+      "Mise en place d'une passerelle Linux et d'une DMZ sous Debian 12, intégrant un routeur avec pare-feu, DNS et NAT, ainsi qu'un serveur web sécurisé pour héberger des intranets accessibles en HTTPS, tout en respectant des règles strictes d'accès réseau.",
     imageout: '/PLDMZ.png',
     imagein: '/PLDMZ-OVERVIEW.png',
     schemaUrl: '/Passerelle Linux et DMZ.pdf',
-    docUrl: '/Passerelle Linux et DMZ.pdf'
+    docUrl: '/Passerelle Linux et DMZ.pdf',
   },
 ])
 
@@ -120,7 +123,7 @@ const openModal = (project: Project) => {
         :class="[
           { 'opacity-0': !isVisible },
           { 'opacity-100': isVisible },
-          `transition-delay-${(index + 1) * 100}`
+          `transition-delay-${(index + 1) * 100}`,
         ]"
         @openModal="openModal(project)"
       />
@@ -142,27 +145,30 @@ const openModal = (project: Project) => {
         :class="[
           { 'opacity-0': !isVisible },
           { 'opacity-100': isVisible },
-          `transition-delay-${(index + 1) * 100}`
+          `transition-delay-${(index + 1) * 100}`,
         ]"
         @openModal="openModal(project)"
       />
     </div>
 
-
     <!-- Modal -->
     <Transition name="modal">
       <div v-if="selectedProject" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="selectedProject = null"></div>
-        <div class="relative w-[90vw] max-w-7xl h-auto max-h-[90vh] p-4 md:p-8 rounded-xl transform transition-all font-primary"
-          :class="isDarkMode ? 'bg-[rgba(33,42,49,0.95)]' : 'bg-[rgba(255,255,255,0.95)]'">
-
+        <div
+          class="absolute inset-0 bg-black/50 backdrop-blur-sm"
+          @click="selectedProject = null"
+        ></div>
+        <div
+          class="relative w-[90vw] max-w-7xl h-auto max-h-[90vh] p-4 md:p-8 rounded-xl transform transition-all font-primary"
+          :class="isDarkMode ? 'bg-[rgba(33,42,49,0.95)]' : 'bg-[rgba(255,255,255,0.95)]'"
+        >
           <div class="h-full flex flex-col">
             <div class="flex-1 flex flex-col items-center justify-start">
               <img
                 :src="selectedProject.imagein"
                 :alt="selectedProject.title"
                 class="w-full max-h-[45vh] object-contain rounded-lg mb-4"
-              >
+              />
 
               <h2
                 class="text-2xl md:text-3xl font-bold mb-2 md:mb-4"
@@ -179,13 +185,20 @@ const openModal = (project: Project) => {
               </p>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-center gap-4 px-2 md:gap-16 md:px-32">
+            <div class="flex flex-row justify-center gap-4 px-2 md:gap-16 md:px-32">
               <button
                 @click="openPdf(selectedProject.schemaUrl)"
                 class="flex-1 px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
                 :class="isDarkMode ? 'bg-[#6EA8CC] text-white' : 'bg-[#3C5B80] text-white'"
               >
                 Voir Documentation Technique
+              </button>
+              <button
+                @click="openPdf(selectedProject.schemaUrl)"
+                class="flex-1 px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
+                :class="isDarkMode ? 'bg-[#9747FF] text-white' : 'bg-[#4A2C6A] text-white'"
+              >
+                Voir Documentation Fonctionnelle
               </button>
             </div>
           </div>

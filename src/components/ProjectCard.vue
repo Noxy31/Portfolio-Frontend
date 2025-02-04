@@ -37,7 +37,7 @@ defineEmits<{
     @click="$emit('openModal', project)"
   >
     <div
-      class="h-48 md:h-56 lg:h-64 w-full overflow-hidden flex items-center justify-center"
+      class="h-48 md:h-56 z-1 lg:h-64 w-full overflow-hidden flex items-center justify-center"
     >
       <img
         :src="project.imageout"

@@ -52,9 +52,9 @@ const projects = ref<Project[]>([
     title: 'Nurse Care',
     description: "Application mobile de gestion de cabinet d'infimiers et d'infirmières",
     imageout: '/NC-Logo.png',
-    imagein: '/path/to/image3.jpg',
-    schemaUrl: '/path/to/schema3.pdf',
-    docUrl: '/path/to/doc3.pdf',
+    imagein: '/NC-Exhibit.png',
+    schemaUrl: '/NurseCare - DT - CLM.pdf',
+    docUrl: '/NurseCare - DF - CLM.pdf',
   },
   {
     id: 4,
@@ -111,7 +111,7 @@ const openModal = (project: Project) => {
 </script>
 
 <template>
-  <div class="w-full flex flex-col items-center justify-center">
+  <div class="w-full z-1001 flex flex-col items-center justify-center">
     <!-- Colonne du haut -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 w-[80%]">
       <ProjectCard
@@ -194,7 +194,7 @@ const openModal = (project: Project) => {
                 Voir Documentation Technique
               </button>
               <button
-                @click="openPdf(selectedProject.schemaUrl)"
+                @click="openPdf(selectedProject.docUrl)"
                 class="flex-1 px-4 md:px-6 py-2 md:py-3 rounded-lg font-medium transition-colors text-sm md:text-base"
                 :class="isDarkMode ? 'bg-[#9747FF] text-white' : 'bg-[#4A2C6A] text-white'"
               >

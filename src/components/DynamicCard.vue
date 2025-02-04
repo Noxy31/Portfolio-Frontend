@@ -70,7 +70,7 @@ const handleClick = async () => {
 <template>
   <div :class="cardClasses" @click="handleClick">
     <!-- Background animation -->
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 z-10 flex select-none flex-wrap overflow-hidden rounded-xl">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 z-0 flex select-none flex-wrap overflow-hidden rounded-xl">
       <template v-for="row in 20" :key="`row-${row}`">
         <div class="flex h-[16px] w-full border-b border-dashed" :class="isDarkMode ? 'border-neutral-600/20' : 'border-neutral-300/20'">
           <template v-for="col in 22" :key="`tile-${row}-${col}`">
@@ -90,7 +90,7 @@ const handleClick = async () => {
     </div>
 
     <!-- Content -->
-    <div class="z-20 flex items-center gap-4">
+    <div class="z-0 flex items-center gap-4">
       <div v-if="$slots.icon" class="flex-shrink-0">
         <slot name="icon"></slot>
       </div>

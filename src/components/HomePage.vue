@@ -297,7 +297,7 @@ onBeforeUnmount(() => {
       </section>
 
       <!-- Section Projects -->
-      <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-0">
+      <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-20">
         <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
         </div>
         <div class="relative z-20 w-full flex flex-col">
@@ -324,7 +324,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Titre -->
-        <div class="relative z-20 w-full h-full flex flex-col items-center gap-8 md:gap-0">
+        <div class="relative z-0 w-full h-full flex flex-col items-center gap-8 md:gap-0">
           <div class="mt-[20vh] w-full flex justify-center">
             <ContactTitle :isDarkMode="isDarkMode" />
           </div>

@@ -1,6 +1,6 @@
 <template>
   <div ref="elementRef"
-    class="group relative transform-gpu overflow-hidden rounded-[20px] p-2 transition-transform hover:scale-[1.01] active:scale-90 h-full"
+    class="group relative z-1000 transform-gpu overflow-hidden rounded-[20px] p-2 transition-transform hover:scale-[1.01] active:scale-90 h-full"
     :class="[
       isDarkMode
         ? 'bg-white/10'
@@ -8,7 +8,7 @@
     ]">
     <ArrowUpRight v-if="withArrow"
       :class="[
-        'absolute right-2 top-2 z-10 size-5 translate-y-4 opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100',
+        'absolute right-2 top-2 z-1000 size-5 translate-y-4 opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100',
         isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'
       ]" />
     <div

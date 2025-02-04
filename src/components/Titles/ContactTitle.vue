@@ -8,7 +8,7 @@ defineProps({
 </script>
 
 <template>
-  <div class="w-full flex justify-center px-4 absolute top-8">
+  <div class="w-full flex z-0 justify-center px-4 absolute top-8">
     <h2 class="text-6xl
                laptop-sm:text-[4rem]
                laptop-md:text-[5rem]

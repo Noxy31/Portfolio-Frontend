@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl'
 
 const props = defineProps<{
-  opacity: number,
   isDarkMode: boolean
 }>()
 
 const ctnRef = ref<HTMLDivElement>()
 const isEnabled = ref(true)
 const isWebGLSupported = ref(true)
+const isInViewport = ref(false)
 
 const detectPerformance = () => {
+  const maxPixels = 2_500_000
   const cpuCores = navigator.hardwareConcurrency || 2
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
   const screenWidth = window.innerWidth
@@ -19,9 +20,9 @@ const detectPerformance = () => {
   const pixelRatio = window.devicePixelRatio || 1
   const totalPixels = screenWidth * screenHeight * pixelRatio
 
-  if (isMobile || totalPixels < 1_000_000) {
+  if (isMobile || totalPixels > maxPixels || cpuCores <= 2) {
     return 'low'
-  } else if (cpuCores <= 4 || totalPixels < 2_000_000) {
+  } else if (cpuCores <= 4 || totalPixels > maxPixels / 2) {
     return 'medium'
   }
   return 'high'
@@ -29,27 +30,27 @@ const detectPerformance = () => {
 
 const quality = {
   high: {
-    dpr: Math.min(window.devicePixelRatio, 1.5),
-    iterations: 6.0,
-    animationSpeed: 1.0,
-    scale: 1
+    dpr: Math.min(window.devicePixelRatio, 1.25),
+    iterations: 5.0,
+    animationSpeed: 0.8,
+    scale: 0.9,
+    targetFPS: 50
   },
   medium: {
     dpr: Math.min(window.devicePixelRatio, 1),
     iterations: 4.0,
-    animationSpeed: 0.8,
-    scale: 0.8
+    animationSpeed: 0.6,
+    scale: 0.75,
+    targetFPS: 40
   },
   low: {
     dpr: 0.75,
     iterations: 3.0,
-    animationSpeed: 0.5,
-    scale: 0.6
+    animationSpeed: 0.4,
+    scale: 0.5,
+    targetFPS: 30
   }
 }
-
-const performanceLevel = detectPerformance()
-const settings = quality[performanceLevel]
 
 const vert = `
   attribute vec2 uv;
@@ -60,7 +61,6 @@ const vert = `
     gl_Position = vec4(position, 0, 1);
   }`
 
-// On modifie juste la gestion du temps dans le fragment shader
 const frag = `
   precision highp float;
   uniform float uTime;
@@ -74,92 +74,113 @@ const frag = `
     float mr = min(uResolution.x, uResolution.y);
     vec2 uv = (vUv.xy * 2.0 - 1.0) * uResolution.xy / mr;
 
-    #ifdef GL_FRAGMENT_PRECISION_HIGH
-      uv *= 1.2;
-    #else
-      uv *= 1.0;
-    #endif
-
-    float d = -mod(uTime * uAnimationSpeed, 20.0); // On limite juste l'accumulation du temps
+    float d = -(uTime * uAnimationSpeed);
     float a = 0.0;
 
     #ifdef GL_FRAGMENT_PRECISION_HIGH
-      for (float i = 0.0; i < 16.0; ++i) {
-        if (i >= uIterations) break;
-        a += cos(i - d - a * uv.x);
-        d += sin(uv.y * i + a);
-      }
-    #else
-      for (float i = 0.0; i < 8.0; ++i) {
+      for (float i = 0.0; i < 12.0; ++i) {
         if (i >= uIterations) break;
         a += cos(i - d - a * uv.x * 0.8);
         d += sin(uv.y * i + a) * 0.8;
       }
-    #endif
-
-    vec3 col = vec3(cos(uv * vec2(d, a)) * 0.4 + 0.2, cos(a + d) * 0.3 + 0.2);
-
-    #ifdef GL_FRAGMENT_PRECISION_HIGH
-      col = cos(col * cos(vec3(d, a, 2.5)) * 0.3 + 0.3);
     #else
-      col = cos(col * 0.3 + 0.3);
+      for (float i = 0.0; i < 6.0; ++i) {
+        if (i >= uIterations) break;
+        a += cos(i - d - a * uv.x * 0.6);
+        d += sin(uv.y * i + a) * 0.6;
+      }
     #endif
+
+    vec3 col = vec3(cos(uv * vec2(d, a)) * 0.3 + 0.2, cos(a + d) * 0.25 + 0.2);
+    col = cos(col * 0.25 + 0.25);
 
     if (uColor.r < 0.5) {
-      col *= 0.6;
+      col *= 0.7;
     }
     gl_FragColor = vec4(col, 1.0);
   }`
 
+const performanceLevel = detectPerformance()
+const settings = quality[performanceLevel]
 let renderer: Renderer | null = null
-let animateId: number | null = null
-let gl: WebGLRenderingContext & { renderer: Renderer; canvas: HTMLCanvasElement } | null = null
 let program: Program | null = null
 let mesh: Mesh | null = null
 let lastFrame = 0
-const targetFPS = performanceLevel === 'low' ? 30 : performanceLevel === 'medium' ? 45 : 60
-const frameInterval = 1000 / targetFPS
+let frameCount = 0
+const frameInterval = 1000 / settings.targetFPS
 
-const checkWebGLSupport = () => {
-  try {
-    const canvas = document.createElement('canvas')
-    const gl = canvas.getContext('webgl')
-    return !!gl
-  } catch {
-    return false
-  }
+const setupIntersectionObserver = () => {
+  if (!ctnRef.value) return
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      isInViewport.value = entries[0].isIntersecting
+      if (isInViewport.value) {
+        startAnimation()
+      } else {
+        stopAnimation()
+      }
+    },
+    { threshold: 0.1 }
+  )
+
+  observer.observe(ctnRef.value)
+  return observer
 }
 
 const resize = () => {
-  if (!ctnRef.value || !renderer || !gl) return
+  if (!ctnRef.value || !renderer || !program) return
 
-  try {
-    const width = ctnRef.value.offsetWidth
-    const height = window.innerHeight
-    const scale = settings.scale
+  const width = ctnRef.value.offsetWidth
+  const height = window.innerHeight
+  const scale = settings.scale
 
-    if (width === 0 || height === 0) return
+  if (width === 0 || height === 0) return
 
-    renderer.setSize(width, height)
+  const internalWidth = Math.floor(width * scale)
+  const internalHeight = Math.floor(height * scale)
 
-    const internalWidth = Math.floor(width * scale)
-    const internalHeight = Math.floor(height * scale)
+  renderer.setSize(width, height)
+  renderer.gl.viewport(0, 0, internalWidth, internalHeight)
+  program.uniforms.uResolution.value = [internalWidth, internalHeight, internalWidth / internalHeight]
 
-    if (internalWidth > 0 && internalHeight > 0) {
-      gl.viewport(0, 0, internalWidth, internalHeight)
-    }
-
-    if (program) {
-      program.uniforms.uResolution.value = [internalWidth, internalHeight, internalWidth / internalHeight]
-    }
-
-    if (mesh) {
-      renderer.render({ scene: mesh })
-    }
-  } catch (error) {
-    console.error('Error during resize:', error)
-    restartWebGL()
+  if (mesh) {
+    renderer.render({ scene: mesh })
   }
+}
+
+const startAnimation = () => {
+  if (!isEnabled.value || !isInViewport.value) return
+
+  lastFrame = performance.now()
+  frameCount = 0
+
+  const update = (time: number) => {
+    if (!isEnabled.value || !isInViewport.value || !renderer || !program || !mesh) {
+      return
+    }
+
+    const elapsed = time - lastFrame
+
+    if (elapsed >= frameInterval) {
+      frameCount++
+      lastFrame = time - (elapsed % frameInterval)
+
+      if (frameCount % Math.max(1, Math.floor(60 / settings.targetFPS)) === 0) {
+        program.uniforms.uTime.value = time * 0.001
+        program.uniforms.uColor.value = new Color(props.isDarkMode ? 0.2 : 0.8, 0.2, 0.5)
+        renderer.render({ scene: mesh })
+      }
+    }
+
+    requestAnimationFrame(update)
+  }
+
+  requestAnimationFrame(update)
+}
+
+const stopAnimation = () => {
+  isEnabled.value = false
 }
 
 const initWebGL = () => {
@@ -167,7 +188,7 @@ const initWebGL = () => {
 
   try {
     renderer = new Renderer({ dpr: settings.dpr })
-    gl = renderer.gl
+    const gl = renderer.gl
 
     const geometry = new Triangle(gl)
     program = new Program(gl, {
@@ -186,8 +207,6 @@ const initWebGL = () => {
 
     if (gl.canvas instanceof HTMLCanvasElement) {
       ctnRef.value.appendChild(gl.canvas)
-      gl.canvas.style.opacity = props.opacity.toString()
-      gl.canvas.style.transition = 'opacity 0.5s ease-in-out'
       gl.canvas.style.width = '100%'
       gl.canvas.style.height = '100%'
       gl.canvas.style.position = 'absolute'
@@ -197,120 +216,38 @@ const initWebGL = () => {
     }
 
     resize()
-    startAnimation()
   } catch (error) {
     console.error('Error initializing WebGL:', error)
     isWebGLSupported.value = false
-    cleanupWebGL()
-  }
-}
-
-const startAnimation = () => {
-  if (animateId !== null) return
-
-  lastFrame = performance.now()
-
-      const update = (time: number) => {
-    if (!isEnabled.value || !renderer || !program || !mesh) {
-      animateId = null
-      return
-    }
-
-    const elapsed = time - lastFrame
-
-    if (elapsed >= frameInterval) {
-      lastFrame = time - (elapsed % frameInterval)
-      program.uniforms.uTime.value = time * 0.001
-      program.uniforms.uColor.value = new Color(props.isDarkMode ? 0.2 : 0.8, 0.2, 0.5)
-      renderer.render({ scene: mesh })
-    }
-
-    animateId = requestAnimationFrame(update)
-  }
-
-  animateId = requestAnimationFrame(update)
-}
-
-const cleanupWebGL = () => {
-  if (animateId !== null) {
-    cancelAnimationFrame(animateId)
-    animateId = null
-  }
-
-  if (gl?.canvas instanceof HTMLCanvasElement && ctnRef.value?.contains(gl.canvas)) {
-    ctnRef.value.removeChild(gl.canvas)
-  }
-
-  if (program) {
-    program.remove()
-    program = null
-  }
-
-  if (gl) {
-    gl.getExtension('WEBGL_lose_context')?.loseContext()
-    gl = null
-  }
-
-  mesh = null
-  renderer = null
-}
-
-const restartWebGL = () => {
-  cleanupWebGL()
-  initWebGL()
-}
-
-let resizeTimeout: number | null = null
-const handleResize = () => {
-  if (resizeTimeout) {
-    window.clearTimeout(resizeTimeout)
-  }
-  resizeTimeout = window.setTimeout(resize, 150)
-}
-
-const handleVisibilityChange = () => {
-  const wasEnabled = isEnabled.value
-  isEnabled.value = document.visibilityState === 'visible'
-
-  if (isEnabled.value && !wasEnabled) {
-    startAnimation()
-  } else if (!isEnabled.value && animateId !== null) {
-    cancelAnimationFrame(animateId)
-    animateId = null
   }
 }
 
 onMounted(() => {
-  isWebGLSupported.value = checkWebGLSupport()
+  isWebGLSupported.value = !!document.createElement('canvas').getContext('webgl')
   if (!isWebGLSupported.value) return
 
   initWebGL()
-  window.addEventListener('resize', handleResize)
-  document.addEventListener('visibilitychange', handleVisibilityChange)
+  const observer = setupIntersectionObserver()
+
+  onUnmounted(() => {
+    observer?.disconnect()
+    stopAnimation()
+
+    if (renderer) {
+      renderer.gl.getExtension('WEBGL_lose_context')?.loseContext()
+      renderer = null
+    }
+
+    program?.remove()
+    program = null
+    mesh = null
+  })
 })
 
-watch(() => props.opacity, (newOpacity) => {
-  if (gl?.canvas instanceof HTMLCanvasElement) {
-    gl.canvas.style.opacity = newOpacity.toString()
-  }
-})
-
-watch(() => props.isDarkMode, (newIsDarkMode) => {
-  if (program) {
-    program.uniforms.uColor.value = new Color(newIsDarkMode ? 0.2 : 0.8, 0.2, 0.5)
-  }
-})
-
-onUnmounted(() => {
-  document.removeEventListener('visibilitychange', handleVisibilityChange)
-  window.removeEventListener('resize', handleResize)
-
-  if (resizeTimeout) {
-    window.clearTimeout(resizeTimeout)
-    resizeTimeout = null
-  }
-
-  cleanupWebGL()
+let resizeRAF: number | null = null
+window.addEventListener('resize', () => {
+  if (resizeRAF) cancelAnimationFrame(resizeRAF)
+  resizeRAF = requestAnimationFrame(resize)
 })
 </script>
 

@@ -95,12 +95,11 @@ const openPdf = (url: string) => {
 
 // Watcher pour gérer le défilement et la navbar/toggle
 watch(selectedProject, (newVal) => {
+  emit('updateModalState', !!newVal)
   if (newVal) {
     document.body.style.overflow = 'hidden'
-    emit('updateModalState', true)
   } else {
     document.body.style.overflow = ''
-    emit('updateModalState', false)
   }
 })
 
@@ -121,8 +120,6 @@ const openModal = (project: Project) => {
         :isDarkMode="isDarkMode"
         class="w-full transform transition-all duration-500"
         :class="[
-          { 'opacity-0': !isVisible },
-          { 'opacity-100': isVisible },
           `transition-delay-${(index + 1) * 100}`,
         ]"
         @openModal="openModal(project)"
@@ -143,16 +140,14 @@ const openModal = (project: Project) => {
         :isDarkMode="isDarkMode"
         class="w-full transform transition-all duration-500"
         :class="[
-          { 'opacity-0': !isVisible },
-          { 'opacity-100': isVisible },
           `transition-delay-${(index + 1) * 100}`,
         ]"
         @openModal="openModal(project)"
       />
     </div>
 
-    <!-- Modal -->
-    <Transition name="modal">
+   <!-- Modal -->
+   <Transition name="modal">
       <div v-if="selectedProject" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
           class="absolute inset-0 bg-black/50 backdrop-blur-sm"

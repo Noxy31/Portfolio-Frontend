@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { Home, FolderOpen, Mail, LucideMoon, LucideSun, UserCircle } from 'lucide-vue-next';
 import type { LucideIcon } from 'lucide-vue-next';
 import ScrollIndicator from '@/components/ScrollIndicator.vue';
@@ -9,6 +9,7 @@ import ProjectCards from '../components/ProjectCards.vue';
 import ContactTitle from '../components/Titles/ContactTitle.vue';
 import DynamicCard from '../components/DynamicCard.vue';
 import AnimatedBackground from '../components/AnimatedBackground.vue';
+import E5View from './E5View.vue';
 import AboutCard from '@/components/AboutCard.vue';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -128,17 +129,6 @@ const scrollToSection = (id: string) => {
   }
 }
 
-const backgroundOpacity = computed(() => {
-  if (isMobile.value) return 1;
-
-  if (!sectionVisibility.value['projects']) return 1
-  if (!sectionVisibility.value['contact']) {
-    return 1 - sectionVisibility.value['projects']
-  } else {
-    return sectionVisibility.value['contact']
-  }
-})
-
 onMounted(() => {
   checkMobile()
   sections.value = Array.from(document.querySelectorAll('section'))
@@ -235,7 +225,7 @@ onBeforeUnmount(() => {
         </li>
       </ul>
     </nav>
-    <AnimatedBackground :opacity="backgroundOpacity" :isDarkMode="isDarkMode" />
+    <AnimatedBackground :isDarkMode="isDarkMode" />
 
     <main class="relative overflow-y-auto">
       <!-- Section Home -->
@@ -311,6 +301,26 @@ onBeforeUnmount(() => {
           </h2>
           <div class="flex-1 flex items-center mt-12">
             <ProjectCards :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"
+              @updateModalState="isModalOpen = $event" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Section E5 -->
+      <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-20">
+        <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
+        </div>
+        <div class="relative z-20 w-full flex flex-col">
+          <h2 class="text-6xl
+           laptop-sm:text-[4rem]
+           laptop-md:text-[5rem]
+           xl:text-[10rem]
+           font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+            :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+            Epreuve E5
+          </h2>
+          <div class="flex-1 flex items-center mt-12">
+            <E5View :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"
               @updateModalState="isModalOpen = $event" />
           </div>
         </div>

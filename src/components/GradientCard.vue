@@ -1,18 +1,24 @@
 <template>
-  <div ref="elementRef"
-    class="group relative z-1000 transform-gpu overflow-hidden rounded-[20px] p-2 transition-transform hover:scale-[1.01] active:scale-90 h-full"
+  <div
+    ref="elementRef"
+    class="group relative z-10 transform-gpu overflow-hidden rounded-[20px] p-2 transition-all duration-300 hover:scale-[1.01] active:scale-90 h-full"
     :class="[
       isDarkMode
-        ? 'bg-white/10'
-        : 'bg-[rgba(255,255,255,0.3)]'
-    ]">
-    <ArrowUpRight v-if="withArrow"
+        ? 'bg-white/10 hover:bg-white/15'
+        : 'bg-[rgba(255,255,255,0.3)] hover:bg-[rgba(255,255,255,0.4)]'
+    ]"
+  >
+    <ArrowUpRight
+      v-if="withArrow"
       :class="[
-        'absolute right-2 top-2 z-1000 size-5 translate-y-4 opacity-0 transition-all group-hover:translate-y-0 group-hover:opacity-100',
+        'absolute right-2 top-2 z-20 size-5 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100',
         isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'
-      ]" />
+      ]"
+    />
+
+    <!-- Gradient Background -->
     <div
-      class="absolute -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-full transition-transform duration-500 group-hover:scale-[3]"
+      class="absolute -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-full transition-transform duration-500 ease-out group-hover:scale-[3] pointer-events-none"
       :class="[state.elementX === null || state.elementY === null ? 'opacity-0' : 'opacity-100']"
       :style="{
         maskImage: `radial-gradient(${circleSize / 2}px circle at center, white, transparent)`,
@@ -24,30 +30,50 @@
           ? 'linear-gradient(135deg, #00FFFF 0%, #FF00FF 50%, #FF0000 100%)'
           : 'linear-gradient(135deg, #00C6FF 0%, #0072FF 50%, #FF0099 100%)',
         opacity: '0.5',
-        filter: 'brightness(1.5) contrast(1.5)'
-      }" />
-    <div class="absolute inset-px rounded-[19px]" :class="[
-      isDarkMode
-        ? 'bg-neutral-900/70'
-        : 'bg-[rgba(255,255,255,0.7)]'
-    ]" />
-    <div v-if="$slots.default"
+        filter: 'brightness(1.5) contrast(1.5)',
+        willChange: 'transform'
+      }"
+    />
+
+    <!-- Background Layer -->
+    <div
+      class="absolute inset-px rounded-[19px] transition-colors duration-300"
       :class="[
-        'grid relative h-48 md:h-56 lg:h-64 place-content-center overflow-hidden rounded-[15px] border-white',
-        isDarkMode ? 'bg-black/50 dark:border-neutral-950' : 'bg-[rgba(255,255,255,0.8)]',
+        isDarkMode
+          ? 'bg-neutral-900/90'
+          : 'bg-[rgba(255,255,255,0.85)]'
+      ]"
+    />
+
+    <!-- Content Container -->
+    <div
+      v-if="$slots.default"
+      class="relative overflow-hidden rounded-[15px] transition-colors duration-300"
+      :class="[
+        'h-48 md:h-56 lg:h-64',
+        isDarkMode ? 'bg-black/30' : 'bg-transparent',
         props.class
-      ]">
+      ]"
+    >
       <slot></slot>
     </div>
+
+    <!-- Text Content -->
     <div class="relative px-4 pb-2 pt-4">
-      <h3 class="text-lg font-semibold" :class="[
-        isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'
-      ]">
+      <h3
+        class="text-lg font-semibold transition-colors duration-300"
+        :class="[
+          isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'
+        ]"
+      >
         {{ title }}
       </h3>
-      <p class="mt-2" :class="[
-        isDarkMode ? 'text-neutral-400' : 'text-neutral-700'
-      ]">
+      <p
+        class="mt-2 transition-colors duration-300"
+        :class="[
+          isDarkMode ? 'text-neutral-400' : 'text-neutral-700'
+        ]"
+      >
         {{ description }}
       </p>
     </div>
@@ -71,3 +97,22 @@ const { state, elementRef } = useMouse()
 const withArrow = props.withArrow ?? false
 const circleSize = props.circleSize ?? 400
 </script>
+
+<style scoped>
+.group {
+  isolation: isolate;
+  transform: translateZ(0);
+}
+
+/* Optimiser les performances de rendu */
+.group,
+.group * {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Éviter les problèmes de z-index stacking context */
+.group > * {
+  isolation: isolate;
+}
+</style>

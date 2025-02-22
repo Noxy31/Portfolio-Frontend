@@ -79,6 +79,7 @@
 <script setup lang="ts">
 import { useMouse } from '../components/useMouse'
 import { ArrowUpRight } from 'lucide-vue-next'
+import type { VNode } from 'vue'
 
 interface Props {
   title: string
@@ -89,10 +90,14 @@ interface Props {
   isDarkMode: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  withArrow: false,
+  circleSize: 400
+})
 
-const withArrow = props.withArrow ?? false
-const circleSize = props.circleSize ?? 400
+defineSlots<{
+  default?: () => VNode | VNode[]
+}>()
 
 const { state, elementRef } = useMouse()
 </script>

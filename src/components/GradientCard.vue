@@ -15,7 +15,6 @@
         isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'
       ]"
     />
-
     <!-- Gradient Background -->
     <div
       class="absolute -translate-x-1/2 -translate-y-1/2 transform-gpu rounded-full transition-transform duration-500 ease-out group-hover:scale-[3] pointer-events-none"
@@ -34,7 +33,6 @@
         willChange: 'transform'
       }"
     />
-
     <!-- Background Layer -->
     <div
       class="absolute inset-px rounded-[19px] transition-colors duration-300"
@@ -44,7 +42,6 @@
           : 'bg-[rgba(255,255,255,0.85)]'
       ]"
     />
-
     <!-- Content Container -->
     <div
       v-if="$slots.default"
@@ -57,7 +54,6 @@
     >
       <slot></slot>
     </div>
-
     <!-- Text Content -->
     <div class="relative px-4 pb-2 pt-4">
       <h3
@@ -84,18 +80,21 @@
 import { useMouse } from '../components/useMouse'
 import { ArrowUpRight } from 'lucide-vue-next'
 
-const props = defineProps<{
+interface Props {
   title: string
   description: string
   withArrow?: boolean
   circleSize?: number
   class?: string
   isDarkMode: boolean
-}>()
+}
 
-const { state, elementRef } = useMouse()
+const props = defineProps<Props>()
+
 const withArrow = props.withArrow ?? false
 const circleSize = props.circleSize ?? 400
+
+const { state, elementRef } = useMouse()
 </script>
 
 <style scoped>
@@ -104,14 +103,12 @@ const circleSize = props.circleSize ?? 400
   transform: translateZ(0);
 }
 
-/* Optimiser les performances de rendu */
 .group,
 .group * {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-/* Éviter les problèmes de z-index stacking context */
 .group > * {
   isolation: isolate;
 }

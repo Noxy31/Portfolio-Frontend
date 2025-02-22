@@ -2,7 +2,6 @@
 import { ref, watch } from 'vue'
 import type { PropType } from 'vue'
 import ProjectCard from './ProjectCard.vue'
-import GradientCard from './GradientCard.vue'
 
 interface Project {
   id: number
@@ -78,28 +77,38 @@ const openModal = (project: Project) => {
       <ProjectCard :project="projects[0]" :isDarkMode="isDarkMode" class="w-full transform transition-all duration-500"
         @openModal="openModal(projects[0])" />
 
-      <!-- Carte de texte simple -->
-      <div class="flex items-center h-full">
-        <GradientCard title="" description="" :isDarkMode="isDarkMode"
-          class="w-full h-full flex items-center justify-center p-6">
-          <div className="text-center text-lg" :class="isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'">
-            <p>Dans le cadre de l'épreuve E5 du BTS SIO SLAM,<br />
-            j'ai réalisé ces deux projets qui illustrent mes compétences en développement d'applications :<br />
-              <br />
-            - NurseCare pour l'application Web responsive sur mobile<br />
-            <br />
-            - Ticky pour l'application mobile native sur Android et iOS<br />
-            </p>
-            </div>
-        </GradientCard>
+       <!-- Carte simple personnalisée -->
+       <div class="w-full h-full rounded-xl p-6 transition-all duration-300 flex items-center justify-center"
+        :class="isDarkMode ? 'bg-[#212A31] shadow-lg' : 'bg-white shadow-md'">
+        <div class="text-center space-y-6"
+          :class="isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'">
+          <p class="text-lg mb-4">Dans le cadre de l'épreuve E5 du BTS SIO SLAM,<br />
+            j'ai réalisé ces deux projets qui illustrent mes compétences en développement d'applications :</p>
+
+          <!-- NurseCare avec flèche vers la gauche -->
+          <div class="flex items-center justify-start space-x-2">
+            <svg class="w-6 h-6 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+            <p class="text-lg text-left">NurseCare pour l'application Web responsive sur mobile</p>
+          </div>
+
+          <!-- Ticky avec flèche vers la droite -->
+          <div class="flex items-center justify-end space-x-2">
+            <p class="text-lg text-right">Ticky pour l'application mobile native sur Android et iOS</p>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </div>
+        </div>
       </div>
+
 
       <!-- Deuxième projet -->
       <ProjectCard :project="projects[1]" :isDarkMode="isDarkMode" class="w-full transform transition-all duration-500"
         @openModal="openModal(projects[1])" />
     </div>
 
-    <!-- Modal -->
     <!-- Modal -->
     <Transition name="modal">
       <div v-if="selectedProject" class="fixed inset-0 z-50 flex items-center justify-center p-4">

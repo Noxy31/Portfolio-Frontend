@@ -50,7 +50,7 @@ const projects = ref<Project[]>([
   {
     id: 3,
     title: 'Nurse Care',
-    description: "Application mobile de gestion de cabinet d'infimiers et d'infirmières",
+    description: "WebApp - Gestion de cabinet d'infimiers et d'infirmières, avec différentes vue pour : Secrétaire, Infirmier (Vue responsive sur mobile), et Manager.",
     imageout: '/NC-Logo.png',
     imagein: '/NC-Exhibit.png',
     schemaUrl: '/NurseCare - DT - CLM.pdf',

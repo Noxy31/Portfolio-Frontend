@@ -20,8 +20,10 @@ gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 const mouseX = ref(0)
 const mouseY = ref(0)
 const isGlowVisible = ref(false)
-const isModalOpen = ref(false);
+const isModalOpen = ref(false)
 const isMobile = ref(false)
+const lastToggleTime = ref(0)
+const TOGGLE_COOLDOWN = 500 // 500ms cooldown between toggles
 
 const checkMobile = () => {
   isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.matchMedia("(max-width: 768px)").matches
@@ -78,7 +80,6 @@ const hasScrolled = ref(false)
 
 const handleScroll = () => {
   const scrollPosition = window.scrollY;
-
   if (scrollPosition > 50) {
     hasScrolled.value = true;
   } else {
@@ -86,18 +87,21 @@ const handleScroll = () => {
   }
 }
 
-watch(isDarkMode, (newValue) => {
-  const root = document.documentElement
-  if (newValue) {
-    root.style.setProperty('--bg-color', '#213447')
-    root.style.setProperty('--text-color', '#EEE9E5')
-    root.style.setProperty('--transition-duration', '0.5s')
-  } else {
-    root.style.setProperty('--bg-color', '#EEE9E5')
-    root.style.setProperty('--text-color', '#213447')
-    root.style.setProperty('--transition-duration', '0.5s')
+const handleDarkModeToggle = () => {
+  const now = Date.now()
+  if (now - lastToggleTime.value < TOGGLE_COOLDOWN) {
+    isDarkMode.value = !isDarkMode.value
+    return
   }
-})
+  lastToggleTime.value = now
+
+  requestAnimationFrame(() => {
+    const root = document.documentElement
+    root.style.cssText = isDarkMode.value
+      ? '--bg-color: #213447; --text-color: #EEE9E5; --transition-duration: 0.5s;'
+      : '--bg-color: #EEE9E5; --text-color: #213447; --transition-duration: 0.5s;'
+  })
+}
 
 const setupScrollObserver = () => {
   observer = new IntersectionObserver((entries) => {
@@ -140,6 +144,7 @@ onMounted(() => {
   window.addEventListener('scroll', handleScroll)
 })
 
+watch(isDarkMode, handleDarkModeToggle, { flush: 'post' })
 
 watch(isModalOpen, (newValue) => {
   if (newValue) {
@@ -162,21 +167,22 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', checkMobile)
   window.removeEventListener('scroll', handleScroll)
 })
-
-
 </script>
 
 <template>
   <div class="relative min-h-[calc(var(--vh)*100)] overflow-hidden">
+    <!-- Background gradients -->
     <div :class="[
       'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#6EA8CC] to-[#EEE9E5]',
       isDarkMode ? 'opacity-0' : 'opacity-100'
-    ]" />
+    ]"></div>
+
     <div :class="[
       'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#213447] to-[#212A31]',
       isDarkMode ? 'opacity-100' : 'opacity-0'
-    ]" />
+    ]"></div>
 
+    <!-- Toggle dark mode -->
     <div :class="[
       'fixed w-full top-0 flex justify-end p-4 z-50 transition-all duration-300 ease-in-out',
       isModalOpen
@@ -191,15 +197,26 @@ onBeforeUnmount(() => {
               : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'
         ]
     ]">
-
       <label class="inline-flex items-center relative">
-        <input class="peer hidden" id="toggle" type="checkbox" v-model="isDarkMode" />
+        <input
+          class="peer hidden"
+          id="toggle"
+          type="checkbox"
+          v-model="isDarkMode"
+        />
         <div
-          class="relative w-[82px] h-[37px] bg-white peer-checked:bg-zinc-500 rounded-full after:absolute after:content-[''] after:w-[30px] after:h-[30px] after:bg-gradient-to-r from-orange-500 to-yellow-400 peer-checked:after:from-zinc-900 peer-checked:after:to-zinc-900 after:rounded-full after:top-[3.75px] after:left-[3.75px] active:after:w-[37px] peer-checked:after:left-[74.5px] peer-checked:after:translate-x-[-100%] shadow-sm duration-300 after:duration-300 after:shadow-md">
+          class="relative w-[82px] h-[37px] bg-white peer-checked:bg-zinc-500 rounded-full
+                 after:absolute after:content-[''] after:w-[30px] after:h-[30px]
+                 after:bg-gradient-to-r from-orange-500 to-yellow-400
+                 peer-checked:after:from-zinc-900 peer-checked:after:to-zinc-900
+                 after:rounded-full after:top-[3.75px] after:left-[3.75px]
+                 after:transform-gpu peer-checked:after:translate-x-[44.5px]
+                 shadow-sm transition-colors after:transition-transform">
         </div>
-        <LucideSun v-if="!isDarkMode" class="absolute w-5 h-5 right-[9px] text-black transition-opacity duration-300" />
-        <LucideMoon v-if="isDarkMode"
-          class="absolute w-5 h-5 left-[9px] text-[#EEE9E5] transition-opacity duration-300" />
+        <Transition name="fade" mode="out-in">
+          <LucideSun v-if="!isDarkMode" class="absolute w-5 h-5 right-[9px] text-black" />
+          <LucideMoon v-else class="absolute w-5 h-5 left-[9px] text-[#EEE9E5]" />
+        </Transition>
       </label>
     </div>
 
@@ -326,20 +343,13 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
+      <!-- Section Contact -->
+<section id="contact" class="h-[calc(var(--vh)*100)] relative z-20 px-4 md:px-0">
+  <div class="relative z-20 w-full h-full flex flex-col items-center gap-8 md:gap-0">
+    <div class="mt-[20vh] w-full flex justify-center">
+      <ContactTitle :isDarkMode="isDarkMode" />
+    </div>
 
-      <section id="contact" class="h-[calc(var(--vh)*100)] relative z-0 px-4 md:px-0">
-        <!-- Blob central -->
-        <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
-
-        </div>
-
-        <!-- Titre -->
-        <div class="relative z-0 w-full h-full flex flex-col items-center gap-8 md:gap-0">
-          <div class="mt-[20vh] w-full flex justify-center">
-            <ContactTitle :isDarkMode="isDarkMode" />
-          </div>
-
-          <!-- Cartes de contact -->
           <DynamicCard title="GitHub" description="github.com/Noxy31" side="left" position="top"
             :isDarkMode="isDarkMode" type="link" action="https://github.com/Noxy31">
             <template #icon>
@@ -399,7 +409,6 @@ main {
   overflow-y: auto;
 }
 
-
 .scroll-indicator-container {
   position: absolute;
   bottom: 0;
@@ -412,5 +421,15 @@ body.modal-open {
 body.modal-open .navbar,
 body.modal-open .toggle-color-mode {
   display: none;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

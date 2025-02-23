@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
-import { Home, FolderOpen, Mail, LucideMoon, LucideSun, UserCircle } from 'lucide-vue-next';
+import { Home, FolderOpen, Mail, LucideMoon, LucideSun, UserCircle, Rss } from 'lucide-vue-next';
 import type { LucideIcon } from 'lucide-vue-next';
 import ScrollIndicator from '@/components/ScrollIndicator.vue';
 import HomeBlob from '@/components/blobs/HomeBlob.vue';
@@ -9,6 +9,7 @@ import ProjectCards from '../components/ProjectCards.vue';
 import ContactTitle from '../components/Titles/ContactTitle.vue';
 import DynamicCard from '../components/DynamicCard.vue';
 import AnimatedBackground from '../components/AnimatedBackground.vue';
+import TechWatchView from '@/components/TechWatch.vue';
 import E5View from './E5View.vue';
 import AboutCard from '@/components/AboutCard.vue';
 import { gsap } from 'gsap';
@@ -22,8 +23,6 @@ const mouseY = ref(0)
 const isGlowVisible = ref(false)
 const isModalOpen = ref(false)
 const isMobile = ref(false)
-const lastToggleTime = ref(0)
-const TOGGLE_COOLDOWN = 500 // 500ms cooldown between toggles
 
 const checkMobile = () => {
   isMobile.value = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.matchMedia("(max-width: 768px)").matches
@@ -67,14 +66,19 @@ const navItems: NavItem[] = [
   { icon: Home, label: 'Home', id: 'home' },
   { icon: UserCircle, label: 'About', id: 'about' },
   { icon: FolderOpen, label: 'Projects', id: 'projects' },
-  { icon: Mail, label: 'Contact', id: 'contact' }
+  { icon: Rss, label: 'Veille', id: 'tech-watch' },
+  { icon: Mail, label: 'Contact', id: 'contact' },
+
 ]
 
 const isDarkMode = ref(false)
+const isTransitioning = ref(false)
 const currentSection = ref('home')
 const sections = ref<HTMLElement[]>([])
 let observer: IntersectionObserver
 const sectionVisibility = ref<{ [key: string]: number }>({})
+
+const TOGGLE_ANIMATION_DURATION = 300
 
 const hasScrolled = ref(false)
 
@@ -88,19 +92,20 @@ const handleScroll = () => {
 }
 
 const handleDarkModeToggle = () => {
-  const now = Date.now()
-  if (now - lastToggleTime.value < TOGGLE_COOLDOWN) {
-    isDarkMode.value = !isDarkMode.value
-    return
-  }
-  lastToggleTime.value = now
+  if (isTransitioning.value) return
+
+  isTransitioning.value = true
 
   requestAnimationFrame(() => {
     const root = document.documentElement
     root.style.cssText = isDarkMode.value
-      ? '--bg-color: #213447; --text-color: #EEE9E5; --transition-duration: 0.5s;'
-      : '--bg-color: #EEE9E5; --text-color: #213447; --transition-duration: 0.5s;'
+      ? '--bg-color: #213447; --text-color: #EEE9E5; --transition-duration: 0.7s;'
+      : '--bg-color: #EEE9E5; --text-color: #213447; --transition-duration: 0.7s;'
   })
+
+  setTimeout(() => {
+    isTransitioning.value = false
+  }, TOGGLE_ANIMATION_DURATION)
 }
 
 const setupScrollObserver = () => {
@@ -197,23 +202,18 @@ onBeforeUnmount(() => {
               : 'opacity-0 -translate-y-full md:opacity-100 md:translate-y-0'
         ]
     ]">
-      <label class="inline-flex items-center relative">
-        <input
-          class="peer hidden"
-          id="toggle"
-          type="checkbox"
-          v-model="isDarkMode"
-        />
-        <div
-          class="relative w-[82px] h-[37px] bg-white peer-checked:bg-zinc-500 rounded-full
-                 after:absolute after:content-[''] after:w-[30px] after:h-[30px]
-                 after:bg-gradient-to-r from-orange-500 to-yellow-400
-                 peer-checked:after:from-zinc-900 peer-checked:after:to-zinc-900
-                 after:rounded-full after:top-[3.75px] after:left-[3.75px]
-                 after:transform-gpu peer-checked:after:translate-x-[44.5px]
-                 shadow-sm transition-colors after:transition-transform">
+      <label class="inline-flex items-center relative" :class="{ 'pointer-events-none': isTransitioning }">
+        <input class="peer hidden" id="toggle" type="checkbox" v-model="isDarkMode" :disabled="isTransitioning" />
+        <div class="relative w-[82px] h-[37px] bg-white peer-checked:bg-zinc-500 rounded-full
+               after:absolute after:content-[''] after:w-[30px] after:h-[30px]
+               after:bg-gradient-to-r from-orange-500 to-yellow-400
+               peer-checked:after:from-zinc-900 peer-checked:after:to-zinc-900
+               after:rounded-full after:top-[3.75px] after:left-[3.75px]
+               after:transform-gpu peer-checked:after:translate-x-[44.5px]
+               shadow-sm transition-all duration-300 ease-in-out
+               after:transition-all after:duration-300 after:ease-in-out">
         </div>
-        <Transition name="fade" mode="out-in">
+        <Transition name="icon-fade" mode="out-in">
           <LucideSun v-if="!isDarkMode" class="absolute w-5 h-5 right-[9px] text-black" />
           <LucideMoon v-else class="absolute w-5 h-5 left-[9px] text-[#EEE9E5]" />
         </Transition>
@@ -343,12 +343,37 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
+      <!-- Section Veille Technologique -->
+      <section id="tech-watch" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-20">
+        <div class="relative z-20 w-full flex flex-col">
+          <h2 class="text-6xl
+       laptop-sm:text-[4rem]
+       laptop-md:text-[5rem]
+       xl:text-[10rem]
+       font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+            :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+            Veille Technologique
+          </h2>
+          <h3 class="text-3xl
+       laptop-sm:text-[2rem]
+       laptop-md:text-[2.5rem]
+       xl:text-[3rem]
+       font-secondary transform-gpu drop-shadow-lg text-center w-full mt-4"
+            :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+            Mes sources
+          </h3>
+          <div class="flex-1 flex items-center mt-12">
+            <TechWatchView :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['tech-watch'])" />
+          </div>
+        </div>
+      </section>
+
       <!-- Section Contact -->
-<section id="contact" class="h-[calc(var(--vh)*100)] relative z-20 px-4 md:px-0">
-  <div class="relative z-20 w-full h-full flex flex-col items-center gap-8 md:gap-0">
-    <div class="mt-[20vh] w-full flex justify-center">
-      <ContactTitle :isDarkMode="isDarkMode" />
-    </div>
+      <section id="contact" class="h-[calc(var(--vh)*100)] relative z-20 px-4 md:px-0">
+        <div class="relative z-20 w-full h-full flex flex-col items-center gap-8 md:gap-0">
+          <div class="mt-[20vh] w-full flex justify-center">
+            <ContactTitle :isDarkMode="isDarkMode" />
+          </div>
 
           <DynamicCard title="GitHub" description="github.com/Noxy31" side="left" position="top"
             :isDarkMode="isDarkMode" type="link" action="https://github.com/Noxy31">

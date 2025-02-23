@@ -68,14 +68,12 @@ const navItems: NavItem[] = [
   { icon: FolderOpen, label: 'Projects', id: 'projects' },
   { icon: Rss, label: 'Veille', id: 'tech-watch' },
   { icon: Mail, label: 'Contact', id: 'contact' },
-
 ]
 
 const isDarkMode = ref(false)
 const isTransitioning = ref(false)
 const currentSection = ref('home')
 const sections = ref<HTMLElement[]>([])
-let observer: IntersectionObserver
 const sectionVisibility = ref<{ [key: string]: number }>({})
 
 const TOGGLE_ANIMATION_DURATION = 300
@@ -108,24 +106,22 @@ const handleDarkModeToggle = () => {
   }, TOGGLE_ANIMATION_DURATION)
 }
 
-const setupScrollObserver = () => {
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      sectionVisibility.value[entry.target.id] = entry.intersectionRatio
+const updateCurrentSection = () => {
+  // Obtenir la position de défilement actuelle
+  const scrollPosition = window.scrollY + window.innerHeight / 2;
 
-      if (entry.intersectionRatio > 0.5) {
-        currentSection.value = entry.target.id
-      }
-    })
-  }, {
-    threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-    rootMargin: '-50px 0px'
-  })
+  // Trouver la section actuellement visible
+  sections.value.forEach((section) => {
+    const sectionTop = section.offsetTop;
+    const sectionBottom = sectionTop + section.offsetHeight;
 
-  sections.value.forEach(section => {
-    observer.observe(section)
-    sectionVisibility.value[section.id] = 0
-  })
+    if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
+      currentSection.value = section.id;
+      sectionVisibility.value[section.id] = 1;
+    } else {
+      sectionVisibility.value[section.id] = 0;
+    }
+  });
 }
 
 const scrollToSection = (id: string) => {
@@ -141,12 +137,13 @@ const scrollToSection = (id: string) => {
 onMounted(() => {
   checkMobile()
   sections.value = Array.from(document.querySelectorAll('section'))
-  setupScrollObserver()
+  updateCurrentSection()
   sectionVisibility.value['home'] = 1
 
   window.addEventListener('mousemove', updateMousePosition)
   window.addEventListener('resize', checkMobile)
   window.addEventListener('scroll', handleScroll)
+  window.addEventListener('scroll', updateCurrentSection)
 })
 
 watch(isDarkMode, handleDarkModeToggle, { flush: 'post' })
@@ -162,15 +159,10 @@ watch(isModalOpen, (newValue) => {
 });
 
 onBeforeUnmount(() => {
-  if (observer) {
-    sections.value.forEach(section => {
-      observer.unobserve(section)
-    })
-    observer.disconnect()
-  }
   window.removeEventListener('mousemove', updateMousePosition)
   window.removeEventListener('resize', checkMobile)
   window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('scroll', updateCurrentSection)
 })
 </script>
 
@@ -303,6 +295,7 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
+      <!-- Section Projects -->
       <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-20">
         <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
         </div>
@@ -319,12 +312,14 @@ onBeforeUnmount(() => {
             <ProjectCards :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"
               @updateModalState="isModalOpen = $event" />
           </div>
-          <!-- E5 content -->
+
+
+          <!-- Section E5 (à l'intérieur de projects) -->
           <h2 class="text-6xl
-            laptop-sm:text-[4rem]
-            laptop-md:text-[5rem]
-            xl:text-[10rem]
-            font-secondary transform-gpu drop-shadow-lg text-center w-full mt-32"
+           laptop-sm:text-[4rem]
+           laptop-md:text-[5rem]
+           xl:text-[10rem]
+           font-secondary transform-gpu drop-shadow-lg text-center w-full mt-32"
             :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
             Epreuve E5
           </h2>

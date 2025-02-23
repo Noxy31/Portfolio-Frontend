@@ -303,7 +303,6 @@ onBeforeUnmount(() => {
         </div>
       </section>
 
-      <!-- Section Projects -->
       <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-20">
         <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
         </div>
@@ -320,19 +319,12 @@ onBeforeUnmount(() => {
             <ProjectCards :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"
               @updateModalState="isModalOpen = $event" />
           </div>
-        </div>
-      </section>
-
-      <!-- Section E5 -->
-      <section id="projects" class="relative min-h-[calc(var(--vh)*100)] pb-16 lg:pb-32 z-20">
-        <div class="absolute inset-0 hidden md:flex items-center justify-center z-10">
-        </div>
-        <div class="relative z-20 w-full flex flex-col">
+          <!-- E5 content -->
           <h2 class="text-6xl
-           laptop-sm:text-[4rem]
-           laptop-md:text-[5rem]
-           xl:text-[10rem]
-           font-secondary transform-gpu drop-shadow-lg text-center w-full mt-8"
+            laptop-sm:text-[4rem]
+            laptop-md:text-[5rem]
+            xl:text-[10rem]
+            font-secondary transform-gpu drop-shadow-lg text-center w-full mt-32"
             :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
             Epreuve E5
           </h2>

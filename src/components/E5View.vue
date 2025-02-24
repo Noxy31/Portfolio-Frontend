@@ -109,6 +109,24 @@ const openModal = (project: Project) => {
         @openModal="openModal(projects[1])" />
     </div>
 
+    <!-- Bouton Excel -->
+    <div class="mt-8 flex justify-center">
+      <button
+        @click="openPdf('/tableau-synthese-E5.pdf')"
+        class="flex items-center gap-3 px-8 py-4 rounded-lg font-medium transition-colors text-lg"
+        :class="isDarkMode ? 'bg-[#217346] text-white hover:bg-[#1a5c38]' : 'bg-[#217346] text-white hover:bg-[#1a5c38]'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21.17 3.25H13.17V4.83H21.17V3.25Z" />
+          <path d="M21.17 6.42H13.17V8H21.17V6.42Z" />
+          <path d="M21.17 9.58H13.17V11.17H21.17V9.58Z" />
+          <path d="M21.17 12.75H13.17V14.33H21.17V12.75Z" />
+          <path d="M11.25 3.25H2.83V20.75H21.17V16H11.25V3.25ZM9.31 17.62L7.5 13.81L5.77 17.62H4.52L6.87 12.75L4.66 8.12H5.93L7.55 11.68L9.2 8.12H10.43L8.22 12.77L10.57 17.62H9.31Z" fill="currentColor" />
+        </svg>
+        Voir le tableau de synthèse E5
+      </button>
+    </div>
+
     <!-- Modal -->
     <Transition name="modal">
       <div v-if="selectedProject" class="fixed inset-0 z-50 flex items-center justify-center p-4">

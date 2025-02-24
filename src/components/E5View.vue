@@ -110,9 +110,9 @@ const openModal = (project: Project) => {
     </div>
 
     <!-- Bouton Excel -->
-    <div class="mt-8 flex justify-center">
+    <div class="mt-16 flex justify-center">
       <button
-        @click="openPdf('/tableau-synthese-E5.pdf')"
+        @click="openPdf('/E4- Tableau de synthèse - Le Meur Cédric - BTS SIO 2025.pdf')"
         class="flex items-center gap-3 px-8 py-4 rounded-lg font-medium transition-colors text-lg"
         :class="isDarkMode ? 'bg-[#217346] text-white hover:bg-[#1a5c38]' : 'bg-[#217346] text-white hover:bg-[#1a5c38]'"
       >
@@ -123,7 +123,7 @@ const openModal = (project: Project) => {
           <path d="M21.17 12.75H13.17V14.33H21.17V12.75Z" />
           <path d="M11.25 3.25H2.83V20.75H21.17V16H11.25V3.25ZM9.31 17.62L7.5 13.81L5.77 17.62H4.52L6.87 12.75L4.66 8.12H5.93L7.55 11.68L9.2 8.12H10.43L8.22 12.77L10.57 17.62H9.31Z" fill="currentColor" />
         </svg>
-        Voir le tableau de synthèse E5
+        Voir le tableau de synthèse E4
       </button>
     </div>
 

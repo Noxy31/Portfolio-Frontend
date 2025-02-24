@@ -35,11 +35,15 @@
         <div class="grid grid-cols-2 gap-4 laptop-sm:gap-3">
           <div>
             <p class="font-medium mb-1">Frontend :</p>
-            <p>Vue.js, React, TypeScript</p>
+            <p>Vue.js, ReactNative, TypeScript, Kotlin</p>
           </div>
           <div>
             <p class="font-medium mb-1">Backend :</p>
-            <p>Node.js, Python, SQL</p>
+            <p>Node.js, Python, SQL (MySQL et PostGreSQL)</p>
+          </div>
+          <div>
+            <p class="font-medium mb-1">SysDev:</p>
+            <p>Déploiement et intégration de services sur serveurs Linux</p>
           </div>
         </div>
       </div>

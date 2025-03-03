@@ -34,8 +34,11 @@ const props = defineProps<{
   isDarkMode: boolean;
 }>();
 
+const emit = defineEmits(['loaded']);
+
 const backgroundEl = ref<HTMLElement | null>(null);
 let vantaEffect: VantaEffect | null = null;
+const isLoaded = ref(false);
 
 // Fonction pour initialiser ou mettre à jour l'effet Vanta
 const setupVantaEffect = () => {
@@ -59,6 +62,18 @@ const setupVantaEffect = () => {
     blurFactor: 0.90,
     zoom: 0.30
   });
+
+  // Signaler que l'effet est chargé
+  if (!isLoaded.value) {
+    isLoaded.value = true;
+    emit('loaded');
+
+    // Masquer le préchargeur directement depuis ce composant
+    const preloader = document.getElementById('app-preloader');
+    if (preloader) {
+      preloader.classList.add('loaded');
+    }
+  }
 };
 
 const loadScripts = async () => {
@@ -80,18 +95,39 @@ const loadScripts = async () => {
       });
     };
 
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js');
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js');
+    // Charger les scripts en parallèle pour plus de rapidité
+    await Promise.all([
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js'),
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js')
+    ]);
 
     setupVantaEffect();
   } catch (error) {
     console.error('Erreur lors du chargement des scripts Vanta:', error);
+
+    // En cas d'erreur, signaler quand même que le composant est "chargé"
+    // pour que l'app continue de fonctionner avec le fond statique
+    if (!isLoaded.value) {
+      isLoaded.value = true;
+      emit('loaded');
+
+      const preloader = document.getElementById('app-preloader');
+      if (preloader) {
+        preloader.classList.add('loaded');
+      }
+    }
   }
 };
 
-
 watch(() => props.isDarkMode, (newValue) => {
+  // Mettre à jour la classe sur le body pour le fond de secours
+  if (newValue) {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
 
+  // Mettre à jour l'effet Vanta avec un délai pour éviter les problèmes de performance
   setTimeout(() => {
     if (vantaEffect) {
       vantaEffect.setOptions({
@@ -102,7 +138,16 @@ watch(() => props.isDarkMode, (newValue) => {
     }
   }, 300);
 }, { flush: 'post' });
+
 onMounted(() => {
+  // Mettre à jour la classe sur le body pour le fond de secours
+  if (props.isDarkMode) {
+    document.body.classList.add('dark-mode');
+  } else {
+    document.body.classList.remove('dark-mode');
+  }
+
+  // Démarrer le chargement des scripts
   loadScripts();
 });
 

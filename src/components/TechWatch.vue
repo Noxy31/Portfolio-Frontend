@@ -47,8 +47,10 @@ const techWatchItems: TechWatchItem[] = [
 </script>
 
 <!-- TechWatchView.vue -->
+<!-- TechWatchView.vue -->
 <template>
-  <div class="w-full container mx-auto px-4 lg:px-16 xl:px-24 md:ml-24">
+  <!-- Container principal corrigé - suppression de md:ml-24 et ajout de classes de centrage -->
+  <div class="w-full mx-auto px-4 lg:px-16 xl:px-24 max-w-screen-xl">
     <div class="flex flex-col gap-32">
       <div v-for="(item, index) in techWatchItems" :key="index"
            class="flex flex-col md:flex-row items-center gap-8 md:gap-16"
@@ -138,5 +140,12 @@ const techWatchItems: TechWatchItem[] = [
   background: rgba(26, 32, 44, 0.25);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Ajout de styles responsive pour garantir le centrage sur tous les écrans */
+@media (min-width: 2000px) {
+  .max-w-screen-xl {
+    max-width: 1536px; /* Limitation de la largeur pour très grands écrans */
+  }
 }
 </style>

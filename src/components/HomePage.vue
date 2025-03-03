@@ -8,6 +8,7 @@ import AnimatedTitle from '@/components/Titles/AnimatedTitle.vue';
 import ProjectCards from '../components/ProjectCards.vue';
 import ContactTitle from '../components/Titles/ContactTitle.vue';
 import DynamicCard from '../components/DynamicCard.vue';
+import FreelanceProjects from '@/components/FreelanceProjects.vue';
 import AnimatedBackground from '../components/AnimatedBackground.vue';
 import TechWatchView from '@/components/TechWatch.vue';
 import E5View from './E5View.vue';
@@ -310,6 +311,18 @@ onBeforeUnmount(() => {
           </h2>
           <div class="flex-1 flex items-center mt-12">
             <ProjectCards :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"
+              @updateModalState="isModalOpen = $event" />
+          </div>
+          <h2 class="text-6xl
+          laptop-sm:text-[4rem]
+          laptop-md:text-[5rem]
+          xl:text-[10rem]
+          font-secondary transform-gpu drop-shadow-lg text-center w-full mt-32"
+            :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
+            Freelance
+          </h2>
+          <div class="flex-1 flex items-center mt-12">
+            <FreelanceProjects :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"
               @updateModalState="isModalOpen = $event" />
           </div>
 

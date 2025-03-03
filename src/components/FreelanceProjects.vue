@@ -74,7 +74,8 @@ const textClass = computed(() => {
         <h3 class="text-3xl font-bold mb-4" :class="textClass">Projets Développeur FullStack Freelance</h3>
         <p class="text-lg" :class="textClass">
           En parallèle de ma formation, je développe mes compétences en tant que développeur freelance.
-          Je propose des solutions web personnalisées pour répondre aux besoins spécifiques de mes clients.
+          <br>Je propose des solutions web personnalisées pour répondre aux besoins spécifiques de mes clients.
+          <br>Je m'occupe également du paramètrage et du déploiement des applications sur les serveurs.
         </p>
       </div>
     </div>

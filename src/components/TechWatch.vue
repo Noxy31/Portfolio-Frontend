@@ -54,7 +54,7 @@ const techWatchItems: TechWatchItem[] = [
            class="flex flex-col md:flex-row items-center gap-8 md:gap-16"
            :class="{ 'md:flex-row-reverse': index % 2 !== 0 }">
 
-        <!-- Image (inchangée) -->
+        <!-- Image -->
         <div class="w-full md:w-1/2">
           <div class="relative overflow-hidden rounded-xl shadow-xl transform transition-all duration-500"
                :class="[
@@ -67,43 +67,76 @@ const techWatchItems: TechWatchItem[] = [
           </div>
         </div>
 
-        <!-- Content avec texte plus grand pour les descriptions -->
-        <div class="w-full md:w-1/2 transform transition-all duration-500"
+        <!-- Content avec effet glassmorphism -->
+        <div class="w-full md:w-1/2 transform transition-all duration-500 relative"
              :class="[
                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10',
                { 'md:text-right': index % 2 !== 0 }
              ]"
              :style="{ transitionDelay: `${(index * 200) + 100}ms` }">
-          <h3 class="text-3xl font-bold mb-4"
-              :class="isDarkMode ? 'text-[#F8F9FA]' : 'text-gray-900'">
-            {{ item.title }}
-          </h3>
-          <p class="text-xl mb-6 leading-relaxed"
-             :class="isDarkMode ? 'text-[#F8F9FA]' : 'text-gray-700'">
-            {{ item.description }}
-          </p>
-          <a v-if="item.link"
-             :href="item.link"
-             target="_blank"
-             class="inline-flex items-center gap-2 text-lg font-medium transition-colors duration-300"
-             :class="{
-               'text-[#F8F9FA] hover:text-[#6EA8CC]': isDarkMode,
-               'text-[#3C5B80] hover:text-[#5A7BA3]': !isDarkMode
-             }">
-            En savoir plus
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 class="h-5 w-5"
-                 fill="none"
-                 viewBox="0 0 24 24"
-                 stroke="currentColor">
-              <path stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </a>
+
+          <!-- Fond avec glassmorphism et fondu sur les bords -->
+          <div class="absolute inset-0 glassmorphism-bg"
+               :class="isDarkMode ? 'glassmorphism-dark' : 'glassmorphism-light'"></div>
+
+          <!-- Contenu - en dessus du fond -->
+          <div class="relative z-10 p-6 rounded-xl">
+            <h3 class="text-3xl font-bold mb-4"
+                :class="isDarkMode ? 'text-[#F8F9FA]' : 'text-gray-900'">
+              {{ item.title }}
+            </h3>
+            <p class="text-xl mb-6 leading-relaxed"
+               :class="isDarkMode ? 'text-[#F8F9FA]' : 'text-gray-700'">
+              {{ item.description }}
+            </p>
+            <a v-if="item.link"
+               :href="item.link"
+               target="_blank"
+               class="inline-flex items-center gap-2 text-lg font-medium transition-colors duration-300"
+               :class="{
+                 'text-[#F8F9FA] hover:text-[#6EA8CC]': isDarkMode,
+                 'text-[#3C5B80] hover:text-[#5A7BA3]': !isDarkMode
+               }">
+              En savoir plus
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   class="h-5 w-5"
+                   fill="none"
+                   viewBox="0 0 24 24"
+                   stroke="currentColor">
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.glassmorphism-bg {
+  border-radius: 16px;
+  /* Effet de flou */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  /* Fondu sur les bords - utilisant un mask-image */
+  -webkit-mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+  mask-image: radial-gradient(circle at center, black 60%, transparent 100%);
+}
+
+.glassmorphism-light {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glassmorphism-dark {
+  background: rgba(26, 32, 44, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+</style>

@@ -95,13 +95,10 @@ const handleDarkModeToggle = () => {
 
   isTransitioning.value = true
 
-  requestAnimationFrame(() => {
-    const root = document.documentElement
-    root.style.cssText = isDarkMode.value
-      ? '--bg-color: #213447; --text-color: #EEE9E5; --transition-duration: 0.7s;'
-      : '--bg-color: #EEE9E5; --text-color: #213447; --transition-duration: 0.7s;'
-  })
+  // Utiliser les classes CSS plutôt que de modifier directement le style
+  document.documentElement.classList.toggle('dark-mode')
 
+  // Débloquer les transitions après un délai
   setTimeout(() => {
     isTransitioning.value = false
   }, TOGGLE_ANIMATION_DURATION)
@@ -170,15 +167,10 @@ onBeforeUnmount(() => {
 <template>
   <div class="relative min-h-[calc(var(--vh)*100)] overflow-hidden">
     <!-- Background gradients -->
-    <div :class="[
-      'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#6EA8CC] to-[#EEE9E5]',
-      isDarkMode ? 'opacity-0' : 'opacity-100'
-    ]"></div>
+    <div class="fixed inset-0 -z-10 bg-gradient-to-br"
+     :class="isDarkMode ? 'from-[#213447] to-[#212A31]' : 'from-[#6EA8CC] to-[#EEE9E5]'">
+</div>
 
-    <div :class="[
-      'fixed inset-0 -z-10 transition-all duration-700 ease-in-out bg-gradient-to-br from-[#213447] to-[#212A31]',
-      isDarkMode ? 'opacity-100' : 'opacity-0'
-    ]"></div>
 
     <!-- Toggle dark mode -->
     <div :class="[
@@ -321,7 +313,7 @@ onBeforeUnmount(() => {
             :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
             Freelance
           </h2>
-          <div class="flex-1 flex items-center mt-12">
+          <div class="flex-1 flex items-center">
             <FreelanceProjects :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"
               @updateModalState="isModalOpen = $event" />
           </div>

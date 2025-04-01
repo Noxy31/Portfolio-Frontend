@@ -82,7 +82,7 @@ const openModal = (project: Project) => {
         :class="isDarkMode ? 'bg-[#212A31] shadow-lg' : 'bg-white shadow-md'">
         <div class="text-center space-y-6"
           :class="isDarkMode ? 'text-neutral-300' : 'text-[#3C5B80]'">
-          <p class="text-lg mb-4">Dans le cadre de l'épreuve E5 du BTS SIO SLAM,<br />
+          <p class="text-lg mb-4">Dans le cadre de l'épreuve E6 du BTS SIO SLAM,<br />
             j'ai réalisé ces deux projets qui illustrent mes compétences en développement d'applications :</p>
 
           <!-- NurseCare avec flèche vers la gauche -->

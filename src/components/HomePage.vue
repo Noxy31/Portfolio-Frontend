@@ -319,14 +319,14 @@ onBeforeUnmount(() => {
           </div>
 
 
-          <!-- Section E5 (à l'intérieur de projects) -->
+          <!-- Section E6 (à l'intérieur de projects) -->
           <h2 class="text-6xl
            laptop-sm:text-[4rem]
            laptop-md:text-[5rem]
            xl:text-[10rem]
            font-secondary transform-gpu drop-shadow-lg text-center w-full mt-32"
             :class="{ 'text-[#D5DDE3]': isDarkMode, 'text-[#213447]': !isDarkMode }">
-            Epreuve E5
+            Epreuve E6
           </h2>
           <div class="flex-1 flex items-center mt-12">
             <E5View :isDarkMode="isDarkMode" :isVisible="Boolean(sectionVisibility['projects'])"

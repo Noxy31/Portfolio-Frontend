@@ -67,13 +67,13 @@ const projects = ref<Project[]>([
   },
   {
     id: 5,
-    title: 'GLPI',
+    title: 'NotaVault',
     description:
-      'Mise en place d’une solution GLPI sur Linux pour la gestion de parc informatique et le suivi des incidents, incluant la configuration et les tests de création/résolution de tickets avec différents profils d’utilisateurs.',
-    imageout: '/GLPI-Logo2.png',
-    imagein: '/GLPI-OVERVIEW.png',
-    schemaUrl: '/GLPI.pdf',
-    docUrl: '/path/to/doc3.pdf',
+      'Application client lourd de coffre-fort numérique, permettant de stocker des notes et images chiffrées de manière sécurisée.',
+    imageout: '/logo/NVLOGO.png',
+    imagein: '/',
+    schemaUrl: '/NotaVault.pdf',
+    docUrl: '/',
   },
   {
     id: 6,

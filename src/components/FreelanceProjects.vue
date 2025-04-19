@@ -25,7 +25,7 @@ const projects = ref([
     id: 'oasys-backoffice',
     title: 'BackOffice OasysConsulting - Gestion de projets',
     description: 'Système complet de gestion de projets pour l\'administration interne, avec découpage par module et rôles, gestion des utilisateurs et suivi des tâches. Accés client, récupération des factures et suivis des projets par client.',
-    image: '/oasys-backoffice.jpg',
+    image: '/OCBO.png',
     technologies: ['Vue.js', 'Vuex', 'Node.js', 'Express', 'MySQL'],
     link: null
   }

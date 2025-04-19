@@ -38,14 +38,15 @@ const projects = ref<Project[]>([
     docUrl: '/NurseCare - DF - CLM.pdf',
   },
   {
-    id: 2,
-    title: "Deliver'Easy",
-    description: 'Application web de logistique et gestion de livraisons.',
-    imageout: '/logo/Logo-DE.png',
-    imagein: '/logo/DE-Exhibit.png',
-    schemaUrl: '/path/to/schema3.pdf',
-    docUrl: '/path/to/doc3.pdf',
-  }
+    id: 5,
+    title: 'NotaVault',
+    description:
+      'Application client lourd de coffre-fort numérique, permettant de stocker des notes et images chiffrées de manière sécurisée.',
+    imageout: '/logo/NVLOGO.png',
+    imagein: '/',
+    schemaUrl: '/NotaVault.pdf',
+    docUrl: '/',
+  },
 ])
 
 watch(selectedProject, (newVal) => {
@@ -94,7 +95,7 @@ const openModal = (project: Project) => {
 
           <!-- Ticky avec flèche vers la droite -->
           <div class="flex items-center justify-end space-x-2">
-            <p class="text-lg text-right">Deliver'Easy, l'application de gestion de tournées et de livraison de colis</p>
+            <p class="text-lg text-right">NotaVault, client lourd Kotlin de stockage de notes et d'images chiffrées</p>
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
             </svg>
@@ -123,7 +124,7 @@ const openModal = (project: Project) => {
             d="M11.25 3.25H2.83V20.75H21.17V16H11.25V3.25ZM9.31 17.62L7.5 13.81L5.77 17.62H4.52L6.87 12.75L4.66 8.12H5.93L7.55 11.68L9.2 8.12H10.43L8.22 12.77L10.57 17.62H9.31Z"
             fill="currentColor" />
         </svg>
-        Voir le tableau de synthèse E4
+        Voir le tableau de synthèse E5
       </button>
 
       <!-- Nouveau bouton Présentation Portfolio -->

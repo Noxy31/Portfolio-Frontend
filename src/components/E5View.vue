@@ -43,7 +43,7 @@ const projects = ref<Project[]>([
     description:
       'Application client lourd de coffre-fort numérique, permettant de stocker des notes et images chiffrées de manière sécurisée.',
     imageout: '/logo/NVLOGO.png',
-    imagein: '/',
+    imagein: '/NV-Exhibit.png',
     schemaUrl: '/NotaVault.pdf',
     docUrl: '/',
   },

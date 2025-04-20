@@ -73,7 +73,7 @@ const projects = ref<Project[]>([
     imageout: '/logo/NVLOGO.png',
     imagein: '/NV-Exhibit.png',
     schemaUrl: '/NotaVault.pdf',
-    docUrl: '/',
+    docUrl: '/NotaVault-DF.pdf',
   },
   {
     id: 6,
